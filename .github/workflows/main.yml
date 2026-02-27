@@ -1,0 +1,27 @@
+name: Executar Busca Manual
+on:
+  workflow_dispatch: # Ativa o botão de start manual
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: pip install google-generativeai google-search-results jinja2
+      - name: Run Search Engine
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SERP_API_KEY: ${{ secrets.SERP_API_KEY }}
+        run: python "Search Engine.py"
+      - name: Commit changes
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add Painel.html
+          git commit -m "Painel atualizado via IA: $(date)" || echo "Sem mudanças"
+          git push
