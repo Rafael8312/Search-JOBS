@@ -422,7 +422,9 @@ def executar():
 
     vagas_list.sort(key=lambda x: x.get("score", 0), reverse=True)
 
-    updated_at = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+    from datetime import timezone, timedelta
+    tz_sp = timezone(timedelta(hours=-3))
+    updated_at = datetime.now(tz=tz_sp).strftime("%d/%m/%Y %H:%M (horário de Brasília)")
 
     html = Template(HTML_TEMPLATE).render(
         vagas=vagas_list,
@@ -437,3 +439,4 @@ def executar():
 
 if __name__ == "__main__":
     executar()
+
