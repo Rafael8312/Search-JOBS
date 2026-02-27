@@ -3,24 +3,679 @@
     <html lang="pt-br">
     <head>
         <meta charset="UTF-8">
-        <title>Radar de Vagas IA</title>
+        <title>Painel Global de Competências</title>
         <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            body { background-color: #0f172a; color: #f8fafc; }
+            .vaga-card { transition: 0.3s; }
+        </style>
     </head>
-    <body class="bg-slate-900 text-slate-100 p-8">
-        <div class="max-w-4xl mx-auto">
-            <h1 class="text-3xl font-bold text-blue-400 mb-2">Radar de Vagas | Rafael Almeida</h1>
-            <p class="text-slate-400 mb-10 text-sm">Atualizado em: 27/02/2026 17:32</p>
-            
-            <div class="space-y-6">
-                
-                
-                
-                <div class="text-center py-20 border-2 border-dashed border-slate-700 rounded-xl">
-                    <p class="text-slate-500">Nenhuma vaga aprovada pela IA hoje. Verifique os logs.</p>
-                </div>
-                
+    <body class="p-6 md:p-12">
+        <header class="max-w-6xl mx-auto mb-10 border-b border-slate-700 pb-6 flex justify-between items-end">
+            <div>
+                <h1 class="text-3xl font-bold text-blue-400">Radar Global de Competências</h1>
+                <p class="text-slate-400">Rafael Almeida | BI, Python & Performance</p>
             </div>
-        </div>
+            <div class="text-right">
+                <label class="text-xs uppercase text-slate-500 block mb-2 font-bold">Ordenar resultados:</label>
+                <select id="sortOrder" onchange="ordenarVagas()" class="bg-slate-800 text-white px-4 py-2 rounded-lg outline-none border border-slate-600">
+                    <option value="desc">Maior Match (%)</option>
+                    <option value="asc">Menor Match (%)</option>
+                </select>
+            </div>
+        </header>
+
+        <main id="vagasContainer" class="max-w-6xl mx-auto grid gap-6">
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Senior Analyst - Business Intelligence</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">WESCO International • Ashland, VA</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Business Intelligence Analyst</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">pyramidin • Reston, VA</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Corporate Intern (Business Line Intelligence Analyst) Hybrid Schedule</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Atlantic Union Bank • Glen Allen, VA</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Sr. Business Intelligence Analyst, Pricing</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">McKesson • Virginia</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Contact Center Business Intelligence Analyst</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Lowes • North Carolina</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Senior Business Intelligence Analyst</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Elder Research • Batesville, VA</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">BI Developer/Analyst (Data Scientist 2)</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Mission Technologies, a division of HII • Fairfax, VA</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">BI Analyst III</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Datavant • Richmond, VA</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Business Intelligence Analyst</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">L3Harris Technologies • Herndon, VA</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">BI Specialist</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Accylerate • Richmond, VA</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Infrastructure Automation Engineer / Python / Remote EST or CST</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Motion Recruitment • Dallas, TX</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Senior Automation Engineer - PLC & Python</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Insight Global • Duncan, OK</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Infrastructure Automation Engineer / Python / Remote EST or CST</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Motion Recruitment Partners, LLC • Anywhere</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Infrastructure Automation Engineer / Python / Remote EST or CST</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Motion Recruitment • Addison, TX</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">QA Automation Engineer / Python / Selenium / Hybrid in Irving 37</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Motion Recruitment • Oklahoma</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Infrastructure Automation Engineer / Python / Remote EST or CST</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Motion Recruitment Partners • Highland Park, TX</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Python Automation Engineer</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">ACL Digital • Plano, TX</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Software Test Automation Engineer Python (Fort Worth, TX)</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Stage 4 Solutions Inc • Fort Worth, TX</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">DevOps Engineer (Python Focused)</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Motion Recruitment • Dallas, TX</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Network Engineer with Python Automation</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Astratek • Dallas, TX</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Performance Marketing & Conversion Specialist</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Franchise Brokers Association • Orlando, FL</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Performance Marketing Specialist</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Mynameis • Florida</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Senior Performance Marketing Specialist in Orlando</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Cosmoquick • Orlando, FL</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Associate Manager, Performance Marketing</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Versant Media • Orlando, FL</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Performance Marketing Specialist</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Robinhood • Clearwater, FL</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Performance Marketing Specialist</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Efficiently • Palm Bay, FL</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Performance Marketing Manager Meta & Google Ads</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">GrowthAssistant • Cape Coral, FL</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Performance Marketing Specialist Jobs in Silver Springs</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Cosmoquick • Silver Springs, FL</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Performance Marketer</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Immobiliare.it • Florida</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Performance Marketing Analyst, Direct Mail</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Ramp • Hopewell, FL</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Data Analytics - Data Analyst - Cairo</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Infomineo • القاهرة</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">ETIC, Data Analytics Intern</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">024 PwC IT Services Egypt LLC • مصر</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Data and Reporting Analyst</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Talent Shore • مصر (+56 مكان آخر)</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Senior Data Analyst (Portfolio Analytics & Modeling)</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">tabby • مصر</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Digital Sr. Analyst</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Vodafone • القاهرة</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Meta Ads Specialist — SaaS Subscription Product (Music Tech / DJ Software)</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Upwork • Anywhere</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Part-Time Facebook Ads Compliance Specialist (Meta Ads Policy Specialist – Risk Manager)</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Upwork • Anywhere</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Paid Ads Specialist Needed to Complete Setup (Google + LinkedIn + Meta) – Healthcare SaaS</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Upwork • Anywhere</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Meta Shop Setup & Social Commerce Ads Specialist (Facebook & Instagram)</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Upwork • Anywhere</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Meta Ads + Google Ads Specialist, Initial Audit + Fixes, Weekly Reporting and Recommendations</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Upwork • Anywhere</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Meta Ads Specialist — SaaS Subscription Product</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">FreelanceJobs • United States</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Digital Ads Specialist & Media Buyer (Google Ads, Meta Ads, Microsoft Ads etc)</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Upwork • Anywhere</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Meta and Instagram Ads Specialist Needed to Scale Fashion Ebooks on Stan Store</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Upwork • Anywhere</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Freelance Ads Specialist (Google & Meta) – Short-Term Project</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">BrAIn Club • Chicago, IL</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
+                        <h2 class="text-xl font-bold">Brand Identity Creation for Meta Ads Specialist</h2>
+                    </div>
+                    <p class="text-slate-400 text-sm mb-4">Upwork • Anywhere</p>
+                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                </div>
+                <div class="w-full md:w-auto">
+                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
+                </div>
+            </div>
+            
+        </main>
+
+        <script>
+            function ordenarVagas() {
+                const container = document.getElementById('vagasContainer');
+                const order = document.getElementById('sortOrder').value;
+                const vagas = Array.from(container.getElementsByClassName('vaga-card'));
+
+                vagas.sort((a, b) => {
+                    const scoreA = parseInt(a.getAttribute('data-score'));
+                    const scoreB = parseInt(b.getAttribute('data-score'));
+                    return order === 'desc' ? scoreB - scoreA : scoreA - scoreB;
+                });
+
+                vagas.forEach(vaga => container.appendChild(vaga));
+            }
+            // Inicia ordenado por maior score
+            window.onload = ordenarVagas;
+        </script>
     </body>
     </html>
     
