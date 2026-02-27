@@ -13,10 +13,10 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.11'
           
       - name: Install dependencies
-        run: pip install google-generativeai google-search-results jinja2
+        run: pip install google-genai google-search-results jinja2
         
       - name: Run Search Engine
         env:
