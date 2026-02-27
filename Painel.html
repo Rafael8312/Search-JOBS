@@ -3,678 +3,896 @@
     <html lang="pt-br">
     <head>
         <meta charset="UTF-8">
-        <title>Painel Global de Competências</title>
+        <title>IA JOBS | RAFAEL ALMEIDA</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <style>
-            body { background-color: #0f172a; color: #f8fafc; }
-            .vaga-card { transition: 0.3s; }
+            body { background: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
+            .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+            .card:hover { border-color: #38bdf8; transform: translateY(-2px); }
         </style>
     </head>
-    <body class="p-6 md:p-12">
-        <header class="max-w-6xl mx-auto mb-10 border-b border-slate-700 pb-6 flex justify-between items-end">
-            <div>
-                <h1 class="text-3xl font-bold text-blue-400">Radar Global de Competências</h1>
-                <p class="text-slate-400">Rafael Almeida | BI, Python & Performance</p>
-            </div>
-            <div class="text-right">
-                <label class="text-xs uppercase text-slate-500 block mb-2 font-bold">Ordenar resultados:</label>
-                <select id="sortOrder" onchange="ordenarVagas()" class="bg-slate-800 text-white px-4 py-2 rounded-lg outline-none border border-slate-600">
-                    <option value="desc">Maior Match (%)</option>
-                    <option value="asc">Menor Match (%)</option>
-                </select>
-            </div>
-        </header>
+    <body class="p-4 md:p-10">
+        <div class="max-w-6xl mx-auto">
+            <header class="flex flex-col md:row justify-between items-center mb-10 gap-6">
+                <div>
+                    <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">Job Intelligence</h1>
+                    <p class="text-slate-400 mt-2">Análise global de competências para Rafael Almeida</p>
+                </div>
+                <div class="flex flex-wrap gap-2 justify-center">
+                    <button onclick="filterVagas('todos')" class="bg-slate-700 px-4 py-2 rounded-lg text-sm font-bold">Todos</button>
+                    <button onclick="filterVagas('Brasil')" class="bg-green-700 px-4 py-2 rounded-lg text-sm font-bold">🇧🇷 Brasil</button>
+                    <button onclick="filterVagas('Exterior')" class="bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold">🌍 Exterior</button>
+                    <button onclick="filterVagas('Remoto')" class="bg-purple-700 px-4 py-2 rounded-lg text-sm font-bold">🏠 Remoto</button>
+                    <select id="sortScore" onchange="sortVagas()" class="bg-slate-800 border border-slate-600 px-4 py-2 rounded-lg text-sm">
+                        <option value="desc">Maior Match</option>
+                        <option value="asc">Menor Match</option>
+                    </select>
+                </div>
+            </header>
 
-        <main id="vagasContainer" class="max-w-6xl mx-auto grid gap-6">
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Senior Analyst - Business Intelligence</h2>
+            <div id="container" class="grid gap-4">
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Analista de BI e MIS Pleno</h2>
+                            <p class="text-slate-400 text-sm">TP | São José dos Pinhais, PR</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">WESCO International • Ashland, VA</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Business Intelligence Analyst</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Analista de BI e MIS Pleno</h2>
+                            <p class="text-slate-400 text-sm">TP | Itajaí - Volta de Cima, Itajaí - SC (+1)</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">pyramidin • Reston, VA</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Corporate Intern (Business Line Intelligence Analyst) Hybrid Schedule</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Analista de BI e MIS Pleno</h2>
+                            <p class="text-slate-400 text-sm">TP | Feira de Santana - Maria Quitéria, Feira de Santana - BA</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Atlantic Union Bank • Glen Allen, VA</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Sr. Business Intelligence Analyst, Pricing</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Analista de B.i</h2>
+                            <p class="text-slate-400 text-sm">Leveros | Assis, SP</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">McKesson • Virginia</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Contact Center Business Intelligence Analyst</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Analista de BI e MIS Pleno</h2>
+                            <p class="text-slate-400 text-sm">TP | Cabedelo - Jacaré, Cabedelo - PB</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Lowes • North Carolina</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Senior Business Intelligence Analyst</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Analista de Projeto e Processos (Dados & BI)</h2>
+                            <p class="text-slate-400 text-sm">VERY TECNOLOGIA S.A. | Teresina, PI</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Elder Research • Batesville, VA</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">BI Developer/Analyst (Data Scientist 2)</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Analista de BI - SR | SAP BO e Qlik Sense</h2>
+                            <p class="text-slate-400 text-sm">Objective | Qualquer lugar</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Mission Technologies, a division of HII • Fairfax, VA</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">BI Analyst III</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Analista de BI Sr.</h2>
+                            <p class="text-slate-400 text-sm">EXAME | São Paulo, SP</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Datavant • Richmond, VA</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Business Intelligence Analyst</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Analista de BI / Dados (Pleno ou Sênior)</h2>
+                            <p class="text-slate-400 text-sm">HOOBOX Robotics | São Paulo, SP</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">L3Harris Technologies • Herndon, VA</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">BI Specialist</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Analista de BI</h2>
+                            <p class="text-slate-400 text-sm">BESTBUYHOTEL VIAGENS E TURISMO LTDA. | Jundiaí - Aglomeração Urbana de Jundiaí, Jundiaí - SP</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Accylerate • Richmond, VA</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Infrastructure Automation Engineer / Python / Remote EST or CST</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Performance Marketing Manager- Entain</h2>
+                            <p class="text-slate-400 text-sm">365Scores | São Paulo, SP (+1)</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Motion Recruitment • Dallas, TX</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Senior Automation Engineer - PLC & Python</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Performance Marketing Lead Ruby Labs</h2>
+                            <p class="text-slate-400 text-sm">Ruby Labs | Amazonas</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Insight Global • Duncan, OK</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Infrastructure Automation Engineer / Python / Remote EST or CST</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Performance Marketing Manager (E-Commerce)</h2>
+                            <p class="text-slate-400 text-sm">Purolabs | Rio de Janeiro, RJ</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Motion Recruitment Partners, LLC • Anywhere</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Infrastructure Automation Engineer / Python / Remote EST or CST</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Diretor (a) De Mídia - Performance c/ inglês fluente</h2>
+                            <p class="text-slate-400 text-sm">Publicis Groupe | São Paulo, SP</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Motion Recruitment • Addison, TX</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">QA Automation Engineer / Python / Selenium / Hybrid in Irving 37</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Performance Marketing Analyst</h2>
+                            <p class="text-slate-400 text-sm">Lago | Rondônia</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Motion Recruitment • Oklahoma</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Infrastructure Automation Engineer / Python / Remote EST or CST</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Analista de Digital Marketing e Performance Sr</h2>
+                            <p class="text-slate-400 text-sm">Krispy Kreme Brasil | São Paulo, SP</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Motion Recruitment Partners • Highland Park, TX</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Python Automation Engineer</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Performance Marketing Analyst</h2>
+                            <p class="text-slate-400 text-sm">Varsity Tutors | Palhoça, SC</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">ACL Digital • Plano, TX</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Software Test Automation Engineer Python (Fort Worth, TX)</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Coordenador de Tráfego Pago | Performance | Mídia Paga | Remoto</h2>
+                            <p class="text-slate-400 text-sm">ALLMA MARKETING LTDA | Barueri, SP</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Stage 4 Solutions Inc • Fort Worth, TX</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">DevOps Engineer (Python Focused)</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Performance Marketing Designer Pleno</h2>
+                            <p class="text-slate-400 text-sm">EBAC Online | Qualquer lugar</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Motion Recruitment • Dallas, TX</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Network Engineer with Python Automation</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Paid & Performance Marketing Lead</h2>
+                            <p class="text-slate-400 text-sm">Jobgether | Brasil</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Astratek • Dallas, TX</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Performance Marketing & Conversion Specialist</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Especialista Em Google Ads E Meta Ads</h2>
+                            <p class="text-slate-400 text-sm">Marcasite Agência Digital | Rio de Janeiro, RJ</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Franchise Brokers Association • Orlando, FL</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Performance Marketing Specialist</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Especialista Em Google Ads E Meta Ads</h2>
+                            <p class="text-slate-400 text-sm">Marcasite Agência Digital | Salvador, BA</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Mynameis • Florida</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Senior Performance Marketing Specialist in Orlando</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Gestor de Tráfego especialista em META</h2>
+                            <p class="text-slate-400 text-sm">Casa do Ads Soluções Google Treinamento em Desenvolvimento Profissional Eireli | Goiânia, GO (+6)</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Cosmoquick • Orlando, FL</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Associate Manager, Performance Marketing</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Analista de Tráfego Pago: Meta ADS e Google ADS</h2>
+                            <p class="text-slate-400 text-sm">J.V. MIDIAS LTDA | Campo Grande, MS</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Versant Media • Orlando, FL</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Performance Marketing Specialist</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Especialista em Meta Ads</h2>
+                            <p class="text-slate-400 text-sm">Confidencial | Rio Grande - RS</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Robinhood • Clearwater, FL</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Performance Marketing Specialist</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Especialista em Google Ads e Meta Ads</h2>
+                            <p class="text-slate-400 text-sm">Marcasite Produção Gráfica Digital | Salvador, BA</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Efficiently • Palm Bay, FL</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Performance Marketing Manager Meta & Google Ads</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Especialista de Tráfego Pago</h2>
+                            <p class="text-slate-400 text-sm">CS RH - Consultoria em Recusrsos Humanos | São Paulo - SP</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">GrowthAssistant • Cape Coral, FL</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Performance Marketing Specialist Jobs in Silver Springs</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Analista em Tráfego Pago (Meta ADS)</h2>
+                            <p class="text-slate-400 text-sm">TASSIANA DUARTE - SERVICOS ADMINISTRATIVOS LTDA | Qualquer lugar</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Cosmoquick • Silver Springs, FL</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Performance Marketer</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Analista de Tráfego Pago: Meta ADS e Google ADS</h2>
+                            <p class="text-slate-400 text-sm">Vision ADS - Tráfego e Performance | Qualquer lugar</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Immobiliare.it • Florida</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Performance Marketing Analyst, Direct Mail</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Analista de Tráfego Meta Ads/Google Ads - Outubro</h2>
+                            <p class="text-slate-400 text-sm">BALZANI COMPANY LTDA | São Paulo, SP</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Ramp • Hopewell, FL</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Data Analytics - Data Analyst - Cairo</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Infrastructure Automation Engineer / Python / Remote EST or CST</h2>
+                            <p class="text-slate-400 text-sm">Motion Recruitment Partners, LLC | Anywhere</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Infomineo • القاهرة</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">ETIC, Data Analytics Intern</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Software Engineer | Python | AI Automation</h2>
+                            <p class="text-slate-400 text-sm">Miratech | Anywhere</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">024 PwC IT Services Egypt LLC • مصر</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Data and Reporting Analyst</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Python Automation Developer (Hybrid/Remote)</h2>
+                            <p class="text-slate-400 text-sm">Capgemini | Anywhere</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Talent Shore • مصر (+56 مكان آخر)</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Senior Data Analyst (Portfolio Analytics & Modeling)</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Python Engineer - RPA Developer</h2>
+                            <p class="text-slate-400 text-sm">Jorie AI | Anywhere</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">tabby • مصر</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Digital Sr. Analyst</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">[Remote] Python Engineer (Browser & Workflow Systems Automation)</h2>
+                            <p class="text-slate-400 text-sm">PulseRise Technologies | Anywhere</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Vodafone • القاهرة</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Meta Ads Specialist — SaaS Subscription Product (Music Tech / DJ Software)</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Python Automation Tester</h2>
+                            <p class="text-slate-400 text-sm">ValueBase Consulting | Anywhere</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Upwork • Anywhere</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Part-Time Facebook Ads Compliance Specialist (Meta Ads Policy Specialist – Risk Manager)</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Senior Python and Data Analytics Developer (Security Automation)</h2>
+                            <p class="text-slate-400 text-sm">Valiant Solutions, LLC | Anywhere</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Upwork • Anywhere</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Paid Ads Specialist Needed to Complete Setup (Google + LinkedIn + Meta) – Healthcare SaaS</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Python Engineer-USA Remote</h2>
+                            <p class="text-slate-400 text-sm">Insight Global | Anywhere</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Upwork • Anywhere</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Meta Shop Setup & Social Commerce Ads Specialist (Facebook & Instagram)</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">QA Automation Python – Team Lead – Remote / Greece / Limassol / Nicosia</h2>
+                            <p class="text-slate-400 text-sm">XM | Anywhere</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Upwork • Anywhere</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Meta Ads + Google Ads Specialist, Initial Audit + Fixes, Weekly Reporting and Recommendations</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Vibe Coding Specialist Python Automation</h2>
+                            <p class="text-slate-400 text-sm">OpenTrain AI | Anywhere</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Upwork • Anywhere</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Meta Ads Specialist — SaaS Subscription Product</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Business Intelligence / Growth Lead</h2>
+                            <p class="text-slate-400 text-sm">Rahal | بغداد</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">FreelanceJobs • United States</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Digital Ads Specialist & Media Buyer (Google Ads, Meta Ads, Microsoft Ads etc)</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Epic BI Developer Sr- Cogito, Caboodle, Clarity</h2>
+                            <p class="text-slate-400 text-sm">Aurora Health Care | العراق (+125 مكان آخر)</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Upwork • Anywhere</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Meta and Instagram Ads Specialist Needed to Scale Fashion Ebooks on Stan Store</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Senior Strategy & Planning Analyst | Ireland | Remote</h2>
+                            <p class="text-slate-400 text-sm">Grafana Labs | العراق (+124 مكان آخر)</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">Upwork • Anywhere</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Freelance Ads Specialist (Google & Meta) – Short-Term Project</h2>
+                
+                <div class="card glass p-6 rounded-2xl transition-all duration-300" 
+                     data-pais="Exterior" data-tipo="Outros" data-score="0">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Exterior • Outros</span>
+                            <h2 class="text-xl font-bold mt-1 uppercase">Senior Analytics Engineer</h2>
+                            <p class="text-slate-400 text-sm">Consensys | العراق (+187 مكان آخر)</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-black text-emerald-400">0%</div>
+                            <div class="text-[10px] text-slate-500 uppercase">Compatibilidade</div>
+                        </div>
                     </div>
-                    <p class="text-slate-400 text-sm mb-4">BrAIn Club • Chicago, IL</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-6 border-l-2 border-slate-700 pl-4 italic">
+                        SCORE: 0 | Erro na análise
+                    </p>
+                    <a href="#" target="_blank" class="inline-block w-full text-center bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/40">Candidatar-se agora</a>
                 </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
+                
             </div>
-            
-            <div class="vaga-card bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-score="0">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <span class="bg-blue-900 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">0% MATCH</span>
-                        <h2 class="text-xl font-bold">Brand Identity Creation for Meta Ads Specialist</h2>
-                    </div>
-                    <p class="text-slate-400 text-sm mb-4">Upwork • Anywhere</p>
-                    <p class="text-slate-300 text-xs italic bg-slate-900/50 p-3 rounded-lg">MATCH: 0% | Erro na análise</p>
-                </div>
-                <div class="w-full md:w-auto">
-                    <a href="#" target="_blank" class="block text-center bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg shadow-blue-900/20">Candidatar-se</a>
-                </div>
-            </div>
-            
-        </main>
+        </div>
 
         <script>
-            function ordenarVagas() {
-                const container = document.getElementById('vagasContainer');
-                const order = document.getElementById('sortOrder').value;
-                const vagas = Array.from(container.getElementsByClassName('vaga-card'));
-
-                vagas.sort((a, b) => {
-                    const scoreA = parseInt(a.getAttribute('data-score'));
-                    const scoreB = parseInt(b.getAttribute('data-score'));
-                    return order === 'desc' ? scoreB - scoreA : scoreA - scoreB;
+            function filterVagas(tipo) {
+                const cards = document.querySelectorAll('.card');
+                cards.forEach(card => {
+                    card.style.display = 'block';
+                    if (tipo === 'Brasil' && card.dataset.pais !== 'Brasil') card.style.display = 'none';
+                    if (tipo === 'Exterior' && card.dataset.pais !== 'Exterior') card.style.display = 'none';
+                    if (tipo === 'Remoto' && card.dataset.tipo !== 'Remoto') card.style.display = 'none';
                 });
-
-                vagas.forEach(vaga => container.appendChild(vaga));
             }
-            // Inicia ordenado por maior score
-            window.onload = ordenarVagas;
+
+            function sortVagas() {
+                const container = document.getElementById('container');
+                const cards = Array.from(container.getElementsByClassName('card'));
+                const order = document.getElementById('sortScore').value;
+                
+                cards.sort((a, b) => {
+                    return order === 'desc' ? b.dataset.score - a.dataset.score : a.dataset.score - b.dataset.score;
+                });
+                cards.forEach(card => container.appendChild(card));
+            }
+            window.onload = sortVagas;
         </script>
     </body>
     </html>
