@@ -32,18 +32,40 @@ def carregar_perfil():
 # ===== Match local (determinístico) =====
 
 SKILLS = {
-    "python": ["python"],
-    "sql": ["sql", "t-sql", "postgres", "mysql", "sql server", "bigquery"],
-    "power bi": ["power bi", "powerbi"],
-    "dax": ["dax"],
-    "excel": ["excel"],
-    "etl": ["etl", "data pipeline", "pipelines", "airflow", "dbt"],
-    "data warehouse": ["data warehouse", "dw", "snowflake", "redshift"],
-    "fabric": ["microsoft fabric", "fabric", "lakehouse", "direct lake", "semantic model"],
-    "pyspark": ["pyspark", "spark"],
-    "data modeling": ["modelagem de dados", "data modeling", "star schema", "kimball"],
-    "performance marketing": ["performance marketing", "meta ads", "facebook ads", "google ads", "paid media", "tráfego pago", "trafego pago"],
-    "ga4": ["ga4", "google analytics 4", "google analytics"],
+    # Tecnologia
+    "python":             ["python"],
+    "javascript":         ["javascript", "js"],
+    "html_css":           ["html", "css"],
+    "firebase":           ["firebase"],
+    "sql":                ["sql", "sql server", "t-sql", "mysql", "postgres", "bigquery"],
+    "power bi":           ["power bi", "powerbi"],
+    "playwright":         ["playwright"],
+    "web scraping":       ["web scraping", "scraping", "beautifulsoup", "scrapy"],
+    "excel automation":   ["excel automation", "openpyxl", "xlrd", "pandas"],
+    "api":                ["api", "integração api", "rest api", "webhook"],
+    # Dados & BI
+    "analise de dados":   ["análise de dados", "analise de dados", "data analysis", "data analyst"],
+    "modelagem de dados": ["modelagem de dados", "data modeling", "star schema", "kimball"],
+    "business intelligence": ["business intelligence", "bi", "inteligência empresarial"],
+    "kpis":               ["kpi", "kpis", "indicadores"],
+    "dax":                ["dax"],
+    "etl":                ["etl", "pipeline", "airflow", "dbt"],
+    "forecast":           ["forecast", "projeção", "projeções", "dimensionamento"],
+    # Marketing
+    "meta ads":           ["meta ads", "facebook ads", "instagram ads", "meta ads manager"],
+    "performance marketing": ["performance marketing", "tráfego pago", "trafego pago", "paid media", "google ads"],
+    "ga4":                ["ga4", "google analytics"],
+    # IA
+    "ia generativa":      ["ia generativa", "generative ai", "gemini", "grok", "perplexity", "chatgpt", "llm"],
+    "prompt engineering": ["prompt", "engenharia de prompt", "prompt engineering"],
+    # Gestão
+    "gestao equipes":     ["gestão de equipes", "liderança", "gestão de time", "team lead"],
+    "planejamento":       ["planejamento estratégico", "planejamento", "strategic planning"],
+    "automacao":          ["automação de processos", "automacao", "rpa", "process automation"],
+    "gestao projetos":    ["gestão de projetos", "project management"],
+    # Office
+    "excel":              ["excel", "microsoft excel"],
+    "powerpoint":         ["powerpoint", "microsoft powerpoint"],
 }
 
 def extrair_skills(texto: str):
@@ -496,5 +518,6 @@ def executar():
 
 if __name__ == "__main__":
     executar()
+
 
 
