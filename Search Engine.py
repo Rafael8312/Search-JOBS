@@ -20,7 +20,7 @@ def carregar_perfil():
 
 def avaliar_vaga_com_ia(perfil, descricao_vaga):
     model = genai.GenerativeModel('gemini-1.5-flash')
-    prompt = f"Analise se este perfil tem +80% de match com a vaga. Perfil: {perfil} Vaga: {descricao_vaga}. Responda 'APROVADO | [Nota]% | [Resumo]' ou 'REPROVADO'."
+    prompt = f"Analise se este perfil tem +70% de match com a vaga. Perfil: {perfil} Vaga: {descricao_vaga}. Responda 'APROVADO | [Nota]% | [Resumo]' ou 'REPROVADO'."
     try:
         response = model.generate_content(prompt)
         return response.text
@@ -88,3 +88,4 @@ def buscar_e_gerar():
 
 if __name__ == "__main__":
     buscar_e_gerar()
+
