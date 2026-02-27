@@ -7,7 +7,13 @@ from jinja2 import Template
 
 SERP_API_KEY = os.getenv("SERP_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+# CORREÇÃO 2: response_mime_type força JSON puro, sem markdown
 genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel(
+    'gemini-1.5-flash',
+    generation_config={"response_mime_type": "application/json"}
+)
 
 def carregar_perfil():
     try:
@@ -16,18 +22,15 @@ def carregar_perfil():
     except:
         return "Rafael Almeida: Especialista em BI, Python, SQL e Performance Marketing."
 
-# CORREÇÃO 1: Detecção determinística de regime (não depende da IA)
 def detectar_regime(titulo, descricao, localizacao):
     texto = f"{titulo} {descricao} {localizacao}".lower()
-    palavras_remoto = ["remote", "remoto", "home office", "trabalho remoto", "100% remoto", "anywhere", "híbrido", "hybrid"]
-    if any(p in texto for p in palavras_remoto):
-        return "Remoto"
-    return "Presencial"
+    palavras_remoto = ["remote", "remoto", "home office", "trabalho remoto",
+                       "100% remoto", "anywhere", "híbrido", "hybrid"]
+    return "Remoto" if any(p in texto for p in palavras_remoto) else "Presencial"
 
 def analisar_vaga_ia(perfil, titulo, empresa, descricao, localizacao):
-    model = genai.GenerativeModel('gemini-1.5-flash')
     prompt = f"""
-Você é um recrutador especialista. Analise a compatibilidade entre o candidato e a vaga abaixo.
+Você é um recrutador sênior. Analise a compatibilidade entre o candidato e a vaga.
 
 PERFIL DO CANDIDATO:
 {perfil[:1500]}
@@ -38,104 +41,118 @@ Empresa: {empresa}
 Localização: {localizacao}
 Descrição: {descricao[:1000]}
 
-INSTRUÇÕES:
-1. Liste todas as competências exigidas pela vaga.
-2. Identifique quais dessas competências o candidato possui com base no perfil.
-3. Calcule: match = (competências que o candidato possui / total de competências da vaga) * 100
-4. Estime o salário mensal em Reais Brasileiros (R$) para esta vaga, considerando cargo, empresa, localidade e nível. Use faixas de mercado brasileiro de 2025/2026.
-5. Escreva um insight de no máximo 15 palavras sobre o match.
-
-Responda APENAS um JSON puro, sem markdown, sem explicações, exatamente neste formato:
-{{"match": <inteiro 0-100>, "salario": "<faixa ex: R$ 8.000 - R$ 12.000>", "insight": "<máximo 15 palavras>"}}
+Retorne um JSON com exatamente estas chaves:
+- "match": inteiro de 0 a 100 (porcentagem de competências da vaga que o candidato possui)
+- "salario": string com faixa salarial estimada em Reais para este cargo/empresa/localidade em 2026
+- "insight": string de no máximo 15 palavras sobre o match
 """
     try:
         response = model.generate_content(prompt)
-        # CORREÇÃO 2A: Remove blocos markdown antes de fazer regex
-        texto_limpo = re.sub(r'```(?:json)?', '', response.text).strip()
-        # CORREÇÃO 2B: Regex correto (sem escape duplo)
-        json_match = re.search(r'\{.*?\}', texto_limpo, re.DOTALL)
-        if json_match:
-            data = json.loads(json_match.group())
-            match_val = int(data.get('match', 0))
-            salario_val = data.get('salario', 'Não estimado')
-            insight_val = data.get('insight', 'Análise inconclusiva.')
-            return match_val, salario_val, insight_val
-        print(f"[AVISO] JSON não encontrado na resposta da IA: {response.text[:200]}")
-        return 50, "Não estimado", "Análise inconclusiva."
+        data = json.loads(response.text)
+        return (
+            int(data.get('match', 0)),
+            str(data.get('salario', 'Não estimado')),
+            str(data.get('insight', 'Análise inconclusiva.'))
+        )
     except Exception as e:
-        # CORREÇÃO 2C: Expõe o erro real para debug no GitHub Actions
-        print(f"[ERRO IA] {e}")
+        print(f"[ERRO IA] {titulo} | {e} | Resposta: {getattr(response, 'text', 'N/A')[:200]}")
         return 0, "Não estimado", "Erro técnico na análise."
+
+# CORREÇÃO 1: Paginação completa via next_page_token
+def buscar_vagas_serpapi(params_base, max_paginas=5):
+    resultados = []
+    params = params_base.copy()
+    for _ in range(max_paginas):
+        try:
+            search = GoogleSearch(params)
+            res = search.get_dict()
+            jobs = res.get("jobs_results", [])
+            resultados.extend(jobs)
+            next_token = res.get("serpapi_pagination", {}).get("next_page_token")
+            if not next_token:
+                break
+            params["next_page_token"] = next_token
+        except Exception as e:
+            print(f"[ERRO SERPAPI] {e}")
+            break
+    return resultados
 
 def executar():
     perfil = carregar_perfil()
 
+    # Mais queries cobrindo diferentes ângulos do perfil
     queries = [
-        {"q": "Analista de BI", "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "Performance Marketing Meta Ads", "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "BI Analyst Remote", "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
-        {"q": "Python Automation Specialist Remote", "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
+        # Brasil
+        {"q": "Analista BI",                          "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Analista Business Intelligence",        "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Analista BI Pleno Senior",             "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Performance Marketing Meta Ads",        "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Gestor Trafego Pago",                  "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Analista Marketing Digital",            "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Analista Dados SQL Python",            "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "BI Developer Power BI",                "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Data Analyst Python",                  "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        # Exterior / Remoto
+        {"q": "BI Analyst Remote",                    "loc": None,     "gl": "us", "hl": "en",    "pais_label": "Exterior"},
+        {"q": "Business Intelligence Remote",         "loc": None,     "gl": "us", "hl": "en",    "pais_label": "Exterior"},
+        {"q": "Performance Marketing Remote",         "loc": None,     "gl": "us", "hl": "en",    "pais_label": "Exterior"},
+        {"q": "Python Automation Specialist Remote",  "loc": None,     "gl": "us", "hl": "en",    "pais_label": "Exterior"},
+        {"q": "Data Analyst Remote SQL Python",       "loc": None,     "gl": "us", "hl": "en",    "pais_label": "Exterior"},
+        {"q": "Marketing Analytics Remote",           "loc": None,     "gl": "us", "hl": "en",    "pais_label": "Exterior"},
     ]
 
     vagas_list = []
     vistos = set()
 
     for item in queries:
-        try:
-            params = {
-                "engine": "google_jobs",
-                "q": item["q"],
-                "api_key": SERP_API_KEY,
-                "gl": item.get("gl", "us"),
-                "hl": item.get("hl", "en"),
-            }
-            if item["loc"]:
-                params["location"] = item["loc"]
+        params_base = {
+            "engine": "google_jobs",
+            "q": item["q"],
+            "api_key": SERP_API_KEY,
+            "gl": item.get("gl", "us"),
+            "hl": item.get("hl", "en"),
+        }
+        if item["loc"]:
+            params_base["location"] = item["loc"]
 
-            search = GoogleSearch(params)
-            results = search.get_dict().get("jobs_results", [])
+        results = buscar_vagas_serpapi(params_base, max_paginas=5)
+        print(f"[INFO] '{item['q']}' → {len(results)} vagas brutas")
 
-            for v in results:
-                jid = v.get("job_id")
-                if jid and jid not in vistos:
-                    vistos.add(jid)
+        for v in results:
+            jid = v.get("job_id")
+            if not jid or jid in vistos:
+                continue
+            vistos.add(jid)
 
-                    titulo = v.get('title', '')
-                    empresa = v.get('company_name', '')
-                    localizacao = v.get("location", "N/D")
-                    descricao = v.get("description", "")
+            titulo    = v.get('title', '')
+            empresa   = v.get('company_name', '')
+            localizacao = v.get("location", "N/D")
+            descricao = v.get("description", "")
 
-                    # CORREÇÃO 1: Regime detectado por código, não pela IA
-                    regime = detectar_regime(titulo, descricao, localizacao)
+            regime = detectar_regime(titulo, descricao, localizacao)
 
-                    # CORREÇÃO 4: Link direto via apply_options
-                    apply_options = v.get("apply_options", [])
-                    if apply_options:
-                        link_vaga = apply_options[0].get("link", "#")
-                    else:
-                        related = [
-                            rl.get("link", "")
-                            for rl in v.get("related_links", [])
-                            if "google.com" not in rl.get("link", "")
-                        ]
-                        link_vaga = related[0] if related else "#"
+            apply_options = v.get("apply_options", [])
+            if apply_options:
+                link_vaga = apply_options[0].get("link", "#")
+            else:
+                related = [
+                    rl.get("link", "")
+                    for rl in v.get("related_links", [])
+                    if "google.com" not in rl.get("link", "")
+                ]
+                link_vaga = related[0] if related else "#"
 
-                    m, salario, mot = analisar_vaga_ia(perfil, titulo, empresa, descricao, localizacao)
+            m, salario, mot = analisar_vaga_ia(perfil, titulo, empresa, descricao, localizacao)
 
-                    vagas_list.append({
-                        "titulo": titulo,
-                        "empresa": empresa,
-                        "link": link_vaga,
-                        "local": localizacao,
-                        "score": m,
-                        "salario": salario,
-                        "pais": item["pais_label"],
-                        "regime": regime,
-                        "analise": mot
-                    })
-        except Exception as e:
-            print(f"[ERRO QUERY] {e}")
-            continue
+            vagas_list.append({
+                "titulo": titulo, "empresa": empresa,
+                "link": link_vaga, "local": localizacao,
+                "score": m, "salario": salario,
+                "pais": item["pais_label"],
+                "regime": regime, "analise": mot
+            })
+
+    print(f"[TOTAL] {len(vagas_list)} vagas únicas processadas.")
 
     html_template = """
     <!DOCTYPE html>
@@ -149,6 +166,7 @@ def executar():
         <div class="max-w-4xl mx-auto">
             <header class="text-center mb-12">
                 <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">JOBS FINDER IA</h1>
+
                 <div class="mt-8 flex flex-wrap justify-center gap-3">
                     <button onclick="setPais('todos')" id="p-todos" class="btn bg-blue-600 px-6 py-2 rounded-xl font-bold">Todos</button>
                     <button onclick="setPais('Brasil')" id="p-Brasil" class="btn bg-slate-800 px-6 py-2 rounded-xl font-bold">🇧🇷 Brasil</button>
@@ -157,6 +175,22 @@ def executar():
                         <input type="checkbox" id="remCheck" onchange="apply()" class="w-4 h-4">
                         <label for="remCheck" class="text-xs font-bold text-purple-400 uppercase">Apenas Remoto</label>
                     </div>
+                </div>
+
+                <!-- NOVO: Contador de vagas -->
+                <div class="mt-6 flex justify-center gap-6 text-sm">
+                    <span class="bg-slate-800 px-4 py-2 rounded-xl">
+                        📋 <span id="cnt-total" class="font-black text-white">0</span> vagas exibidas
+                    </span>
+                    <span class="bg-slate-800 px-4 py-2 rounded-xl">
+                        🇧🇷 <span id="cnt-br" class="font-black text-white">0</span> Brasil
+                    </span>
+                    <span class="bg-slate-800 px-4 py-2 rounded-xl">
+                        🌍 <span id="cnt-ext" class="font-black text-white">0</span> Exterior
+                    </span>
+                    <span class="bg-slate-800 px-4 py-2 rounded-xl">
+                        🏠 <span id="cnt-rem" class="font-black text-white">0</span> Remoto
+                    </span>
                 </div>
             </header>
 
@@ -169,7 +203,7 @@ def executar():
                             <div class="flex flex-wrap gap-2 items-center mb-1">
                                 <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">{{ v.pais }} • {{ v.regime }}</span>
                                 {% if v.regime == 'Remoto' %}
-                                <span class="text-[10px] font-black bg-purple-900 text-purple-300 px-2 py-0.5 rounded-full uppercase">🏠 Remoto</span>
+                                <span class="text-[10px] font-black bg-purple-900 text-purple-300 px-2 py-0.5 rounded-full">🏠 REMOTO</span>
                                 {% endif %}
                             </div>
                             <h2 class="text-xl font-bold text-white mt-1">{{ v.titulo }}</h2>
@@ -201,20 +235,31 @@ def executar():
                     b.classList.add('bg-slate-800');
                 });
                 const btn = document.getElementById('p-' + p);
-                if (btn) {
-                    btn.classList.remove('bg-slate-800');
-                    btn.classList.add('bg-blue-600');
-                }
+                if (btn) { btn.classList.remove('bg-slate-800'); btn.classList.add('bg-blue-600'); }
                 apply();
             }
 
             function apply() {
                 const rem = document.getElementById('remCheck').checked;
+                let total = 0, br = 0, ext = 0, remCnt = 0;
+
                 document.querySelectorAll('.vaga-card').forEach(c => {
                     const mP = paisF === 'todos' || c.dataset.pais === paisF;
                     const mR = !rem || c.dataset.regime === 'Remoto';
-                    c.style.display = (mP && mR) ? 'block' : 'none';
+                    const visible = mP && mR;
+                    c.style.display = visible ? 'block' : 'none';
+
+                    // Contadores (sempre conta todos, independente do filtro ativo)
+                    if (c.dataset.pais === 'Brasil') br++;
+                    if (c.dataset.pais === 'Exterior') ext++;
+                    if (c.dataset.regime === 'Remoto') remCnt++;
+                    if (visible) total++;
                 });
+
+                document.getElementById('cnt-total').textContent = total;
+                document.getElementById('cnt-br').textContent = br;
+                document.getElementById('cnt-ext').textContent = ext;
+                document.getElementById('cnt-rem').textContent = remCnt;
             }
 
             window.onload = () => {
