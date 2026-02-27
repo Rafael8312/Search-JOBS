@@ -1,6 +1,8 @@
 name: Executar Busca Manual
 on:
-  workflow_dispatch: # Ativa o botão de start manual
+  schedule:
+    - cron: '0 */6 * * *' # Roda a cada 6 horas automaticamente
+  workflow_dispatch:      # Permite rodar manual se quiser
 
 jobs:
   build:
