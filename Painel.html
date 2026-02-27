@@ -3,28 +3,25 @@
     <html lang="pt-br">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>AI Job Matcher | Rafael Almeida</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <style>
-            body { background-color: #0f172a; color: #f8fafc; }
-            .job-card { background: #1e293b; border-left: 4px solid #38bdf8; transition: 0.3s; }
-            .job-card:hover { transform: scale(1.01); border-color: #818cf8; }
-            .btn-update { border: 1px solid #38bdf8; color: #38bdf8; transition: 0.3s; }
-            .btn-update:hover { background: #38bdf8; color: #0f172a; }
+            body { background-color: #0f172a; color: #f8fafc; font-family: sans-serif; }
+            .job-card { background: #1e293b; border-left: 4px solid #38bdf8; }
+            .btn-update { border: 1px solid #38bdf8; color: #38bdf8; }
         </style>
     </head>
     <body class="p-6 md:p-12">
-        <header class="max-w-5xl mx-auto mb-12 flex flex-col md:row justify-between items-center gap-6">
+        <header class="max-w-5xl mx-auto mb-10 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-3xl font-bold">Vagas <span class="text-blue-400">Match 70%+</span></h1>
-                <p class="text-slate-400">Filtro inteligente para Rafael de Almeida Soares</p>
+                <h1 class="text-3xl font-bold italic">JOBS <span class="text-blue-400">FINDER IA</span></h1>
+                <p class="text-slate-400">Match 70%+ para Rafael Almeida</p>
             </div>
-            <div class="text-right">
-                <a href="https://github.com/Rafael8312/Search-JOBS/actions" target="_blank" class="btn-update px-5 py-2 rounded-full text-sm font-bold inline-block mb-2">
-                    🔄 Atualizar Painel
+            <div class="text-center md:text-right">
+                <a href="https://github.com/Rafael8312/Search-JOBS/actions" target="_blank" class="btn-update px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-blue-400 hover:text-slate-900 transition">
+                    🔄 Novo Start Manual
                 </a>
-                <p class="text-[10px] text-slate-500 uppercase tracking-widest">Última Varredura: 27/02/2026 16:10</p>
+                <p class="text-[10px] text-slate-500 mt-2">Sincronizado: 27/02/2026 16:17</p>
             </div>
         </header>
 
@@ -33,7 +30,7 @@
             
             
             <div class="text-center py-20 border-2 border-dashed border-slate-800 rounded-3xl">
-                <p class="text-slate-500 italic">Nenhum match de 70% encontrado nas buscas de hoje. Tente atualizar mais tarde.</p>
+                <p class="text-slate-500">Nenhuma vaga com match relevante encontrada hoje.</p>
             </div>
             
         </main>
