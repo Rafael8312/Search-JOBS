@@ -5,25 +5,31 @@ from datetime import datetime
 from serpapi import GoogleSearch
 from jinja2 import Template
 
-# IA (opcional) - só para "insight" (não para match)
-from google import genai
-from google.genai import types
+# IA opcional (somente para "insight")
+try:
+    from google import genai
+    from google.genai import types
+except Exception:
+    genai = None
+    types = None
 
-SERP_API_KEY = os.getenv("SERP_API_KEY")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
-# Modelo atual do SDK google-genai (ajuste se desejar)
+SERP_API_KEY = os.getenv("SERP_API_KEY", "")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
 
-# Câmbio aproximado para converter estimativas internacionais -> BRL
-USD_TO_BRL = float(os.getenv("USD_TO_BRL", "5.0"))
-EUR_TO_BRL = float(os.getenv("EUR_TO_BRL", "5.5"))
-
-# Limites para custo/performance
 MAX_PAGINAS_POR_QUERY = int(os.getenv("MAX_PAGINAS_POR_QUERY", "5"))
-MAX_VAGAS_PARA_INSIGHT_IA = int(os.getenv("MAX_VAGAS_PARA_INSIGHT_IA", "60"))  # evita gasto alto
+MAX_VAGAS_PARA_INSIGHT_IA = int(os.getenv("MAX_VAGAS_PARA_INSIGHT_IA", "60"))
 
-# ======= Skills / Match local (determinístico) =======
+# ===== Perfil =====
+
+def carregar_perfil():
+    try:
+        with open("Perfil.txt", "r", encoding="utf-8") as f:
+            return f.read()
+    except Exception:
+        return "Rafael Almeida: Especialista em BI, Python, SQL e Performance Marketing."
+
+# ===== Match local (determinístico) =====
 
 SKILLS = {
     "python": ["python"],
@@ -36,10 +42,8 @@ SKILLS = {
     "fabric": ["microsoft fabric", "fabric", "lakehouse", "direct lake", "semantic model"],
     "pyspark": ["pyspark", "spark"],
     "data modeling": ["modelagem de dados", "data modeling", "star schema", "kimball"],
-    "performance marketing": ["performance marketing", "meta ads", "facebook ads", "google ads", "paid media", "tráfego pago", "traffic manager"],
+    "performance marketing": ["performance marketing", "meta ads", "facebook ads", "google ads", "paid media", "tráfego pago", "trafego pago"],
     "ga4": ["ga4", "google analytics 4", "google analytics"],
-    "seo": ["seo"],
-    "crm": ["crm", "salesforce", "hubspot"],
 }
 
 def extrair_skills(texto: str):
@@ -55,16 +59,15 @@ def calcular_match_local(perfil_txt: str, titulo: str, descricao: str, localizac
     skills_vaga = extrair_skills(vaga_txt)
     skills_perfil = extrair_skills(perfil_txt)
 
-    # Se não detectar skills na vaga, não zera: neutro 50
     if not skills_vaga:
+        # Sem skills detectadas na vaga -> neutro, evita 0% enganoso
         return 50, sorted(list(skills_perfil)), [], []
 
     inter = skills_vaga.intersection(skills_perfil)
     match = round((len(inter) / len(skills_vaga)) * 100)
-
     return match, sorted(list(skills_perfil)), sorted(list(skills_vaga)), sorted(list(inter))
 
-# ======= Regime remoto (determinístico) =======
+# ===== Remoto (determinístico) =====
 
 def detectar_regime(titulo, descricao, localizacao, extensoes=None):
     texto = f"{titulo} {descricao} {localizacao} {' '.join(extensoes or [])}".lower()
@@ -72,12 +75,9 @@ def detectar_regime(titulo, descricao, localizacao, extensoes=None):
         "remote", "remoto", "home office", "work from home",
         "trabalho remoto", "100% remoto", "anywhere", "any location"
     ]
-    # SerpAPI às vezes marca work_from_home em detected_extensions (não vem sempre)
-    if any(p in texto for p in palavras_remoto):
-        return "Remoto"
-    return "Presencial"
+    return "Remoto" if any(p in texto for p in palavras_remoto) else "Presencial"
 
-# ======= Salário: extrair SerpAPI + fallback =======
+# ===== Salário (SerpAPI + fallback) =====
 
 def extrair_salario_serpapi(v):
     det = (v.get("detected_extensions") or {})
@@ -85,21 +85,18 @@ def extrair_salario_serpapi(v):
         return det["salary"]
 
     ext = v.get("extensions") or []
-    # Às vezes vem como string no extensions: "17–35 an hour", "135K–150K a year"
     for e in ext:
-        if isinstance(e, str) and any(x in e for x in ["R$", "K", "k", "a year", "per year", "per month", "an hour", "por mês", "por ano", "/mês", "/ano"]):
-            # evita capturar coisas como "Full-time"
-            if any(w in e.lower() for w in ["year", "month", "hour", "r$", "k"]):
-                return e
+        if isinstance(e, str) and any(x in e for x in ["R$", "a year", "per year", "per month", "an hour", "por mês", "por ano", "/mês", "/ano", "K", "k"]):
+            return e
     return None
 
 def inferir_senioridade(texto):
     t = (texto or "").lower()
-    if any(x in t for x in ["sr", "sênior", "senior", "lead", "principal", "especialista"]):
+    if any(x in t for x in [" sr", "sênior", "senior", "lead", "principal", "especialista"]):
         return "sr"
-    if any(x in t for x in ["pl", "pleno", "mid", "middle"]):
+    if any(x in t for x in [" pl", "pleno", "mid", "middle"]):
         return "pl"
-    if any(x in t for x in ["jr", "júnior", "junior", "entry", "estágio", "intern"]):
+    if any(x in t for x in [" jr", "júnior", "junior", "entry", "estágio", "intern"]):
         return "jr"
     return "pl"
 
@@ -107,7 +104,6 @@ def faixa_salario_brasil_por_cargo(titulo):
     t = (titulo or "").lower()
     senior = inferir_senioridade(titulo)
 
-    # BI / Dados
     if any(x in t for x in ["bi", "business intelligence", "power bi", "data analyst", "analista de dados"]):
         if senior == "jr":
             return "R$ 5.500 - R$ 8.000"
@@ -115,7 +111,6 @@ def faixa_salario_brasil_por_cargo(titulo):
             return "R$ 11.500 - R$ 19.300"
         return "R$ 8.500 - R$ 13.500"
 
-    # Marketing performance / tráfego
     if any(x in t for x in ["performance", "meta ads", "google ads", "tráfego", "trafego", "paid media"]):
         if senior == "jr":
             return "R$ 4.000 - R$ 7.000"
@@ -123,8 +118,7 @@ def faixa_salario_brasil_por_cargo(titulo):
             return "R$ 10.000 - R$ 18.000"
         return "R$ 7.000 - R$ 12.000"
 
-    # Python automação
-    if "python" in t and any(x in t for x in ["automation", "automação", "automatizacao", "automação"]):
+    if "python" in t and any(x in t for x in ["automation", "automação", "automatizacao", "automacao"]):
         if senior == "sr":
             return "R$ 12.000 - R$ 22.000"
         return "R$ 8.000 - R$ 16.000"
@@ -132,26 +126,21 @@ def faixa_salario_brasil_por_cargo(titulo):
     return "Não informado"
 
 def salario_estimado(v, pais_label):
-    # 1) Se vier salário do SerpAPI, usa
     s = extrair_salario_serpapi(v)
     if s:
         return s
 
-    # 2) Sem salário: fallback por tabela (BR) ou conversão aproximada (Exterior)
     titulo = v.get("title", "")
-    if pais_label == "Brasil":
-        return faixa_salario_brasil_por_cargo(titulo)
-
-    # Exterior: deixa em BRL estimado pela tabela brasileira com multiplicador
-    # (simples e transparente; melhor que "Não estimado")
     base = faixa_salario_brasil_por_cargo(titulo)
+
+    if pais_label == "Brasil":
+        return base
+
     if base.startswith("R$"):
-        # multiplicador para exterior/remoto (ajustável)
         return base + " (estimado p/ Exterior)"
     return "Não informado"
 
-# ======= Link de candidatura =======
-# Nota: dependendo do layout, apply_options pode não existir. [web:28]
+# ===== Link de candidatura =====
 
 def extrair_link_candidatura(v):
     apply_options = v.get("apply_options") or []
@@ -160,7 +149,6 @@ def extrair_link_candidatura(v):
         if link:
             return link
 
-    # fallback: apply_link (quando existir) ou related_links fora de google.com
     if v.get("apply_link"):
         return v["apply_link"]
 
@@ -171,8 +159,7 @@ def extrair_link_candidatura(v):
     ]
     return related[0] if related else "#"
 
-# ======= SerpAPI paginação =======
-# SerpAPI Google Jobs usa next_page_token para paginar. [web:22]
+# ===== SerpAPI paginação =====
 
 def buscar_vagas_serpapi(params_base, max_paginas=5):
     resultados = []
@@ -180,6 +167,7 @@ def buscar_vagas_serpapi(params_base, max_paginas=5):
     for _ in range(max_paginas):
         search = GoogleSearch(params)
         res = search.get_dict()
+
         jobs = res.get("jobs_results", []) or []
         resultados.extend(jobs)
 
@@ -189,26 +177,23 @@ def buscar_vagas_serpapi(params_base, max_paginas=5):
         params["next_page_token"] = next_token
     return resultados
 
-# ======= IA (opcional) apenas para "insight" curto =======
+# ===== IA (opcional) só para insight =====
 
 def gerar_insight_ia(perfil, titulo, empresa, descricao, localizacao, match, skills_vaga, skills_inter):
-    if not GEMINI_API_KEY:
+    if not (genai and types and GEMINI_API_KEY):
         return "Match calculado localmente."
 
     client = genai.Client(api_key=GEMINI_API_KEY)
     prompt = f"""
-Você é um recrutador. Gere um insight curto (máximo 15 palavras) sobre a aderência do candidato à vaga.
-Use o match já calculado (não recalcule).
+Gere um insight curto (máx 15 palavras) sobre o match do candidato.
+Não recalcule o match.
 
 Match: {match}%
 Skills exigidas detectadas: {skills_vaga}
-Skills do candidato detectadas na vaga: {skills_inter}
+Skills em comum: {skills_inter}
 
 Vaga: {titulo} | {empresa} | {localizacao}
-Descrição (trecho): {descricao[:600]}
-
-Responda APENAS JSON:
-{{"insight":"..."}}
+Retorne APENAS JSON: {{"insight":"..."}}
 """
     try:
         resp = client.models.generate_content(
@@ -223,7 +208,7 @@ Responda APENAS JSON:
         print(f"[WARN IA] insight falhou: {e}")
         return "Match calculado localmente."
 
-# ======= HTML =======
+# ===== HTML =====
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -350,32 +335,32 @@ HTML_TEMPLATE = """
 </html>
 """
 
-# ======= Main =======
+# ===== Execução =====
 
 def executar():
+    if not SERP_API_KEY:
+        raise RuntimeError("SERP_API_KEY não encontrada nos Secrets.")
+
     perfil = carregar_perfil()
 
     queries = [
-        # Brasil
-        {"q": "Analista BI",                         "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "Analista Business Intelligence",       "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "Power BI",                             "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "Microsoft Fabric Power BI",            "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "Analista Dados SQL Python",           "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "Performance Marketing Meta Ads",       "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "Gestor Trafego Pago",                  "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Analista BI",                   "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Analista Business Intelligence","loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Power BI",                      "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Microsoft Fabric Power BI",     "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Analista Dados SQL Python",     "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Performance Marketing Meta Ads","loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Gestor Trafego Pago",           "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
 
-        # Exterior / Remoto
-        {"q": "BI Analyst Remote",                    "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
-        {"q": "Business Intelligence Remote",         "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
-        {"q": "Power BI Developer Remote",            "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
-        {"q": "Python Automation Specialist Remote",   "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
-        {"q": "Marketing Analytics Remote",           "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
+        {"q": "BI Analyst Remote",             "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
+        {"q": "Business Intelligence Remote",  "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
+        {"q": "Power BI Developer Remote",     "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
+        {"q": "Python Automation Specialist Remote","loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
+        {"q": "Marketing Analytics Remote",    "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
     ]
 
     vagas_list = []
     vistos = set()
-
     total_bruto = 0
 
     for item in queries:
@@ -411,15 +396,13 @@ def executar():
             link_vaga = extrair_link_candidatura(v)
             salario = salario_estimado(v, pais)
 
-            # MATCH: local (não zera por falha de IA)
-            match, skills_perfil, skills_vaga, skills_inter = calcular_match_local(
+            match, _skills_perfil, skills_vaga, skills_inter = calcular_match_local(
                 perfil_txt=perfil,
                 titulo=titulo,
                 descricao=descricao,
                 localizacao=localizacao
             )
 
-            # Insight: IA opcional e limitada para custo
             analise = "Match calculado localmente."
             if len(vagas_list) < MAX_VAGAS_PARA_INSIGHT_IA:
                 analise = gerar_insight_ia(perfil, titulo, empresa, descricao, localizacao, match, skills_vaga, skills_inter)
@@ -437,7 +420,6 @@ def executar():
                 "skills_inter": skills_inter,
             })
 
-    # Ordena por score desc
     vagas_list.sort(key=lambda x: x.get("score", 0), reverse=True)
 
     updated_at = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
@@ -452,7 +434,6 @@ def executar():
         f.write(html)
 
     print(f"[TOTAL] bruto={total_bruto} | unicas={len(vagas_list)} | IA_insights={min(len(vagas_list), MAX_VAGAS_PARA_INSIGHT_IA)}")
-
 
 if __name__ == "__main__":
     executar()
