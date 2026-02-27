@@ -1,0 +1,3 @@
+google-genai
+google-search-results
+jinja2
