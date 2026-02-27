@@ -215,75 +215,128 @@ HTML_TEMPLATE = """
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>IA Job Finder | Rafael Almeida</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thryken Search Jobs</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; }
+    .btn-active { background: #e5e7eb !important; color: #111827 !important; }
+    .card-hover:hover { border-color: #9ca3af; }
+  </style>
 </head>
-<body class="bg-[#0b0e14] text-slate-300 p-4 md:p-10 font-sans">
+<body class="bg-[#1a1a1a] text-[#d1d5db] p-4 md:p-10">
   <div class="max-w-4xl mx-auto">
-    <header class="text-center mb-12">
-      <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">JOBS FINDER IA</h1>
 
-      <div class="mt-8 flex flex-wrap justify-center gap-3">
-        <button onclick="setPais('todos')" id="p-todos" class="btn bg-blue-600 px-6 py-2 rounded-xl font-bold">Todos</button>
-        <button onclick="setPais('Brasil')" id="p-Brasil" class="btn bg-slate-800 px-6 py-2 rounded-xl font-bold">🇧🇷 Brasil</button>
-        <button onclick="setPais('Exterior')" id="p-Exterior" class="btn bg-slate-800 px-6 py-2 rounded-xl font-bold">🌍 Exterior</button>
-        <div class="flex items-center gap-2 bg-slate-900 px-4 py-2 rounded-xl border border-slate-800 ml-4">
-          <input type="checkbox" id="remCheck" onchange="apply()" class="w-4 h-4">
-          <label for="remCheck" class="text-xs font-bold text-purple-400 uppercase">Apenas Remoto</label>
+    <!-- HEADER -->
+    <header class="text-center mb-12">
+
+      <!-- Logo + Título -->
+      <div class="flex flex-col items-center gap-4 mb-6">
+        <img src="https://i.ibb.co/qYRc7DZ7/logo-thryken.png"
+             alt="Thryken"
+             class="h-20 w-auto object-contain"
+             onerror="this.style.display='none'">
+        <h1 class="text-4xl font-black tracking-tight text-white uppercase">
+          Thryken Search Jobs
+        </h1>
+      </div>
+
+      <!-- Filtros -->
+      <div class="mt-4 flex flex-wrap justify-center gap-3">
+        <button onclick="setPais('todos')" id="p-todos"
+                class="btn bg-[#e5e7eb] text-[#111827] px-6 py-2 rounded-xl font-bold">Todos</button>
+        <button onclick="setPais('Brasil')" id="p-Brasil"
+                class="btn bg-[#2d2d2d] text-[#d1d5db] px-6 py-2 rounded-xl font-bold border border-[#3f3f3f]">🇧🇷 Brasil</button>
+        <button onclick="setPais('Exterior')" id="p-Exterior"
+                class="btn bg-[#2d2d2d] text-[#d1d5db] px-6 py-2 rounded-xl font-bold border border-[#3f3f3f]">🌍 Exterior</button>
+        <div class="flex items-center gap-2 bg-[#2d2d2d] px-4 py-2 rounded-xl border border-[#3f3f3f] ml-2">
+          <input type="checkbox" id="remCheck" onchange="apply()" class="w-4 h-4 accent-white">
+          <label for="remCheck" class="text-xs font-bold text-[#9ca3af] uppercase">Apenas Remoto</label>
         </div>
       </div>
 
-      <div class="mt-6 flex flex-wrap justify-center gap-4 text-sm">
-        <span class="bg-slate-800 px-4 py-2 rounded-xl">📋 <span id="cnt-total" class="font-black text-white">0</span> exibidas</span>
-        <span class="bg-slate-800 px-4 py-2 rounded-xl">🔎 <span id="cnt-found" class="font-black text-white">{{ total_found }}</span> encontradas</span>
-        <span class="bg-slate-800 px-4 py-2 rounded-xl">🇧🇷 <span id="cnt-br" class="font-black text-white">0</span> Brasil</span>
-        <span class="bg-slate-800 px-4 py-2 rounded-xl">🌍 <span id="cnt-ext" class="font-black text-white">0</span> Exterior</span>
-        <span class="bg-slate-800 px-4 py-2 rounded-xl">🏠 <span id="cnt-rem" class="font-black text-white">0</span> Remoto</span>
+      <!-- Contadores -->
+      <div class="mt-6 flex flex-wrap justify-center gap-3 text-sm">
+        <span class="bg-[#2d2d2d] border border-[#3f3f3f] px-4 py-2 rounded-xl">
+          📋 <span id="cnt-total" class="font-black text-white">0</span> exibidas
+        </span>
+        <span class="bg-[#2d2d2d] border border-[#3f3f3f] px-4 py-2 rounded-xl">
+          🔎 <span class="font-black text-white">{{ total_found }}</span> encontradas
+        </span>
+        <span class="bg-[#2d2d2d] border border-[#3f3f3f] px-4 py-2 rounded-xl">
+          🇧🇷 <span id="cnt-br" class="font-black text-white">0</span> Brasil
+        </span>
+        <span class="bg-[#2d2d2d] border border-[#3f3f3f] px-4 py-2 rounded-xl">
+          🌍 <span id="cnt-ext" class="font-black text-white">0</span> Exterior
+        </span>
+        <span class="bg-[#2d2d2d] border border-[#3f3f3f] px-4 py-2 rounded-xl">
+          🏠 <span id="cnt-rem" class="font-black text-white">0</span> Remoto
+        </span>
       </div>
 
-      <p class="mt-4 text-xs text-slate-500">Atualizado: {{ updated_at }}</p>
+      <p class="mt-4 text-xs text-[#6b7280]">Atualizado: {{ updated_at }}</p>
     </header>
 
+    <!-- VAGAS -->
     <div id="grid-vagas" class="space-y-4">
       {% for v in vagas %}
-      <div class="vaga-card bg-[#161b26] p-6 rounded-3xl border border-slate-800 transition hover:border-blue-500"
+      <div class="vaga-card bg-[#222222] p-6 rounded-3xl border border-[#3f3f3f] transition card-hover"
            data-pais="{{ v.pais }}" data-regime="{{ v.regime }}" data-score="{{ v.score }}">
         <div class="flex flex-col md:flex-row justify-between gap-4">
           <div class="flex-1">
+
             <div class="flex flex-wrap gap-2 items-center mb-1">
-              <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">{{ v.pais }} • {{ v.regime }}</span>
+              <span class="text-[10px] font-black text-[#9ca3af] uppercase tracking-widest">
+                {{ v.pais }} • {{ v.regime }}
+              </span>
               {% if v.regime == 'Remoto' %}
-              <span class="text-[10px] font-black bg-purple-900 text-purple-300 px-2 py-0.5 rounded-full">🏠 REMOTO</span>
+              <span class="text-[10px] font-black bg-[#374151] text-[#d1d5db] px-2 py-0.5 rounded-full">🏠 REMOTO</span>
               {% endif %}
             </div>
 
             <h2 class="text-xl font-bold text-white mt-1">{{ v.titulo }}</h2>
-            <p class="text-slate-400 text-sm mb-1">{{ v.empresa }} ({{ v.local }})</p>
-            <p class="text-yellow-400 text-sm font-bold mb-3">💰 {{ v.salario }}</p>
+            <p class="text-[#9ca3af] text-sm mb-1">{{ v.empresa }} ({{ v.local }})</p>
+            <p class="text-[#fbbf24] text-sm font-bold mb-3">💰 {{ v.salario }}</p>
 
-            <p class="text-slate-300 text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-emerald-500">
+            <p class="text-[#d1d5db] text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-[#6b7280]">
               {{ v.analise }}
             </p>
 
             {% if v.skills_inter %}
-            <p class="mt-3 text-xs text-slate-400">
-              Skills em comum: {{ v.skills_inter|join(', ') }}
+            <p class="mt-3 text-xs text-[#9ca3af]">
+              ✅ Skills em comum: <span class="text-white">{{ v.skills_inter|join(', ') }}</span>
             </p>
             {% endif %}
           </div>
 
-          <div class="text-center md:text-right min-w-[120px]">
-            <div class="text-4xl font-black text-emerald-400">{{ v.score }}%</div>
-            <div class="text-[10px] text-slate-500 mt-1 uppercase">compatibilidade</div>
+          <div class="text-center md:text-right min-w-[130px]">
+            <div class="text-4xl font-black text-white">{{ v.score }}%</div>
+            <div class="text-[10px] text-[#6b7280] mt-1 uppercase">compatibilidade</div>
             <a href="{{ v.link }}" target="_blank" rel="noopener noreferrer"
-               class="block mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl">
-               CANDIDATAR
+               class="block mt-4 bg-white hover:bg-[#e5e7eb] text-[#111827] font-bold py-3 rounded-xl transition">
+              CANDIDATAR
             </a>
           </div>
         </div>
       </div>
       {% endfor %}
     </div>
+
+    <!-- FOOTER -->
+    <footer class="text-center mt-16 pb-8 text-xs text-[#6b7280] space-y-2">
+      <p>Desenvolvido por <span class="text-white font-bold">Rafael Almeida</span></p>
+      <p>
+        <a href="https://wa.me/5532984489364" target="_blank" rel="noopener noreferrer"
+           class="inline-flex items-center gap-2 text-[#9ca3af] hover:text-white transition font-medium">
+          <!-- WhatsApp SVG icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" class="w-4 h-4 fill-current">
+            <path d="M16 0C7.163 0 0 7.163 0 16c0 2.827.737 5.48 2.027 7.784L0 32l8.395-2.003A15.94 15.94 0 0 0 16 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm0 29.333a13.27 13.27 0 0 1-6.773-1.85l-.486-.289-4.985 1.189 1.237-4.858-.317-.499A13.267 13.267 0 0 1 2.667 16C2.667 8.637 8.637 2.667 16 2.667S29.333 8.637 29.333 16 23.363 29.333 16 29.333zm7.273-9.927c-.397-.199-2.35-1.159-2.715-1.292-.365-.133-.63-.199-.895.199-.265.397-1.027 1.292-1.259 1.557-.232.265-.464.298-.861.1-.397-.199-1.676-.618-3.193-1.972-1.18-1.052-1.977-2.351-2.208-2.748-.232-.397-.025-.611.174-.809.179-.178.397-.464.596-.696.199-.232.265-.397.397-.662.133-.265.066-.497-.033-.696-.099-.199-.895-2.158-1.226-2.955-.323-.775-.651-.67-.895-.682l-.762-.013c-.265 0-.696.099-1.061.497-.365.397-1.391 1.358-1.391 3.313 0 1.955 1.424 3.844 1.623 4.109.199.265 2.802 4.278 6.788 5.998.949.41 1.689.654 2.266.838.952.303 1.818.26 2.502.158.763-.114 2.35-.96 2.682-1.889.332-.928.332-1.724.232-1.889-.099-.166-.365-.265-.762-.464z"/>
+          </svg>
+          +55 (32) 9 8448-9364
+        </a>
+      </p>
+    </footer>
+
   </div>
 
   <script>
@@ -292,11 +345,14 @@ HTML_TEMPLATE = """
     function setPais(p) {
       paisF = p;
       document.querySelectorAll('.btn').forEach(b => {
-        b.classList.remove('bg-blue-600');
-        b.classList.add('bg-slate-800');
+        b.classList.remove('bg-[#e5e7eb]', 'text-[#111827]');
+        b.classList.add('bg-[#2d2d2d]', 'text-[#d1d5db]');
       });
       const btn = document.getElementById('p-' + p);
-      if (btn) { btn.classList.remove('bg-slate-800'); btn.classList.add('bg-blue-600'); }
+      if (btn) {
+        btn.classList.remove('bg-[#2d2d2d]', 'text-[#d1d5db]');
+        btn.classList.add('bg-[#e5e7eb]', 'text-[#111827]');
+      }
       apply();
     }
 
@@ -334,6 +390,7 @@ HTML_TEMPLATE = """
 </body>
 </html>
 """
+
 
 # ===== Execução =====
 
@@ -439,4 +496,5 @@ def executar():
 
 if __name__ == "__main__":
     executar()
+
 
