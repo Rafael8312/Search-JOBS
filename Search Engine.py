@@ -1,104 +1,356 @@
 import os
 import json
 import re
+from datetime import datetime
 from serpapi import GoogleSearch
-from google import genai                        # NOVO SDK
-from google.genai import types                  # NOVO SDK
 from jinja2 import Template
 
-SERP_API_KEY  = os.getenv("SERP_API_KEY")
+# IA (opcional) - só para "insight" (não para match)
+from google import genai
+from google.genai import types
+
+SERP_API_KEY = os.getenv("SERP_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# NOVO SDK: client em vez de configure()
-client = genai.Client(api_key=GEMINI_API_KEY)
-GEMINI_MODEL = "gemini-2.0-flash"              # modelo disponível no novo SDK
+# Modelo atual do SDK google-genai (ajuste se desejar)
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
 
-def carregar_perfil():
-    try:
-        with open("Perfil.txt", "r", encoding="utf-8") as f:
-            return f.read()
-    except:
-        return "Rafael Almeida: Especialista em BI, Python, SQL e Performance Marketing."
+# Câmbio aproximado para converter estimativas internacionais -> BRL
+USD_TO_BRL = float(os.getenv("USD_TO_BRL", "5.0"))
+EUR_TO_BRL = float(os.getenv("EUR_TO_BRL", "5.5"))
 
-def detectar_regime(titulo, descricao, localizacao):
-    texto = f"{titulo} {descricao} {localizacao}".lower()
-    palavras_remoto = ["remote", "remoto", "home office", "trabalho remoto",
-                       "100% remoto", "anywhere", "híbrido", "hybrid"]
-    return "Remoto" if any(p in texto for p in palavras_remoto) else "Presencial"
+# Limites para custo/performance
+MAX_PAGINAS_POR_QUERY = int(os.getenv("MAX_PAGINAS_POR_QUERY", "5"))
+MAX_VAGAS_PARA_INSIGHT_IA = int(os.getenv("MAX_VAGAS_PARA_INSIGHT_IA", "60"))  # evita gasto alto
 
-def analisar_vaga_ia(perfil, titulo, empresa, descricao, localizacao):
-    prompt = f"""
-Você é um recrutador sênior. Analise a compatibilidade entre o candidato e a vaga.
+# ======= Skills / Match local (determinístico) =======
 
-PERFIL DO CANDIDATO:
-{perfil[:1500]}
+SKILLS = {
+    "python": ["python"],
+    "sql": ["sql", "t-sql", "postgres", "mysql", "sql server", "bigquery"],
+    "power bi": ["power bi", "powerbi"],
+    "dax": ["dax"],
+    "excel": ["excel"],
+    "etl": ["etl", "data pipeline", "pipelines", "airflow", "dbt"],
+    "data warehouse": ["data warehouse", "dw", "snowflake", "redshift"],
+    "fabric": ["microsoft fabric", "fabric", "lakehouse", "direct lake", "semantic model"],
+    "pyspark": ["pyspark", "spark"],
+    "data modeling": ["modelagem de dados", "data modeling", "star schema", "kimball"],
+    "performance marketing": ["performance marketing", "meta ads", "facebook ads", "google ads", "paid media", "tráfego pago", "traffic manager"],
+    "ga4": ["ga4", "google analytics 4", "google analytics"],
+    "seo": ["seo"],
+    "crm": ["crm", "salesforce", "hubspot"],
+}
 
-VAGA:
-Título: {titulo}
-Empresa: {empresa}
-Localização: {localizacao}
-Descrição: {descricao[:1000]}
+def extrair_skills(texto: str):
+    t = (texto or "").lower()
+    found = set()
+    for skill, aliases in SKILLS.items():
+        if any(a in t for a in aliases):
+            found.add(skill)
+    return found
 
-INSTRUÇÕES:
-1. Liste as competências exigidas pela vaga.
-2. Identifique quais o candidato possui.
-3. Calcule: match = (competências que o candidato possui / total exigido) * 100, arredonde para inteiro.
-4. Estime a faixa salarial mensal em R$ para este cargo em 2026, considerando empresa e localidade.
-5. Escreva um insight de no máximo 15 palavras sobre o match.
+def calcular_match_local(perfil_txt: str, titulo: str, descricao: str, localizacao: str):
+    vaga_txt = f"{titulo} {descricao} {localizacao}"
+    skills_vaga = extrair_skills(vaga_txt)
+    skills_perfil = extrair_skills(perfil_txt)
 
-Retorne APENAS JSON puro com exatamente estas chaves:
-{{"match": <inteiro 0-100>, "salario": "<ex: R$ 8.000 - R$ 12.000>", "insight": "<máximo 15 palavras>"}}
-"""
-    response_text = ""
-    try:
-        # NOVO SDK com JSON mode garantido
-        response = client.models.generate_content(
-            model=GEMINI_MODEL,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json"
-            )
-        )
-        response_text = response.text
-        data = json.loads(response_text)
-        return (
-            int(data.get('match', 0)),
-            str(data.get('salario', 'Não estimado')),
-            str(data.get('insight', 'Análise inconclusiva.'))
-        )
-    except json.JSONDecodeError as e:
-        # Fallback: tenta extrair JSON mesmo com lixo ao redor
-        json_match = re.search(r'\{.*?\}', response_text, re.DOTALL)
-        if json_match:
-            try:
-                data = json.loads(json_match.group())
-                return int(data.get('match', 0)), str(data.get('salario', 'N/D')), str(data.get('insight', ''))
-            except:
-                pass
-        print(f"[ERRO JSON] {titulo} | {e} | Resposta: {response_text[:200]}")
-        return 0, "Não estimado", "Erro ao interpretar resposta da IA."
-    except Exception as e:
-        # CORRIGIDO: response_text inicializado antes, sem UnboundLocalError
-        print(f"[ERRO IA] {titulo} | {e} | Resposta: {response_text[:200]}")
-        return 0, "Não estimado", "Erro técnico na análise."
+    # Se não detectar skills na vaga, não zera: neutro 50
+    if not skills_vaga:
+        return 50, sorted(list(skills_perfil)), [], []
+
+    inter = skills_vaga.intersection(skills_perfil)
+    match = round((len(inter) / len(skills_vaga)) * 100)
+
+    return match, sorted(list(skills_perfil)), sorted(list(skills_vaga)), sorted(list(inter))
+
+# ======= Regime remoto (determinístico) =======
+
+def detectar_regime(titulo, descricao, localizacao, extensoes=None):
+    texto = f"{titulo} {descricao} {localizacao} {' '.join(extensoes or [])}".lower()
+    palavras_remoto = [
+        "remote", "remoto", "home office", "work from home",
+        "trabalho remoto", "100% remoto", "anywhere", "any location"
+    ]
+    # SerpAPI às vezes marca work_from_home em detected_extensions (não vem sempre)
+    if any(p in texto for p in palavras_remoto):
+        return "Remoto"
+    return "Presencial"
+
+# ======= Salário: extrair SerpAPI + fallback =======
+
+def extrair_salario_serpapi(v):
+    det = (v.get("detected_extensions") or {})
+    if det.get("salary"):
+        return det["salary"]
+
+    ext = v.get("extensions") or []
+    # Às vezes vem como string no extensions: "17–35 an hour", "135K–150K a year"
+    for e in ext:
+        if isinstance(e, str) and any(x in e for x in ["R$", "K", "k", "a year", "per year", "per month", "an hour", "por mês", "por ano", "/mês", "/ano"]):
+            # evita capturar coisas como "Full-time"
+            if any(w in e.lower() for w in ["year", "month", "hour", "r$", "k"]):
+                return e
+    return None
+
+def inferir_senioridade(texto):
+    t = (texto or "").lower()
+    if any(x in t for x in ["sr", "sênior", "senior", "lead", "principal", "especialista"]):
+        return "sr"
+    if any(x in t for x in ["pl", "pleno", "mid", "middle"]):
+        return "pl"
+    if any(x in t for x in ["jr", "júnior", "junior", "entry", "estágio", "intern"]):
+        return "jr"
+    return "pl"
+
+def faixa_salario_brasil_por_cargo(titulo):
+    t = (titulo or "").lower()
+    senior = inferir_senioridade(titulo)
+
+    # BI / Dados
+    if any(x in t for x in ["bi", "business intelligence", "power bi", "data analyst", "analista de dados"]):
+        if senior == "jr":
+            return "R$ 5.500 - R$ 8.000"
+        if senior == "sr":
+            return "R$ 11.500 - R$ 19.300"
+        return "R$ 8.500 - R$ 13.500"
+
+    # Marketing performance / tráfego
+    if any(x in t for x in ["performance", "meta ads", "google ads", "tráfego", "trafego", "paid media"]):
+        if senior == "jr":
+            return "R$ 4.000 - R$ 7.000"
+        if senior == "sr":
+            return "R$ 10.000 - R$ 18.000"
+        return "R$ 7.000 - R$ 12.000"
+
+    # Python automação
+    if "python" in t and any(x in t for x in ["automation", "automação", "automatizacao", "automação"]):
+        if senior == "sr":
+            return "R$ 12.000 - R$ 22.000"
+        return "R$ 8.000 - R$ 16.000"
+
+    return "Não informado"
+
+def salario_estimado(v, pais_label):
+    # 1) Se vier salário do SerpAPI, usa
+    s = extrair_salario_serpapi(v)
+    if s:
+        return s
+
+    # 2) Sem salário: fallback por tabela (BR) ou conversão aproximada (Exterior)
+    titulo = v.get("title", "")
+    if pais_label == "Brasil":
+        return faixa_salario_brasil_por_cargo(titulo)
+
+    # Exterior: deixa em BRL estimado pela tabela brasileira com multiplicador
+    # (simples e transparente; melhor que "Não estimado")
+    base = faixa_salario_brasil_por_cargo(titulo)
+    if base.startswith("R$"):
+        # multiplicador para exterior/remoto (ajustável)
+        return base + " (estimado p/ Exterior)"
+    return "Não informado"
+
+# ======= Link de candidatura =======
+# Nota: dependendo do layout, apply_options pode não existir. [web:28]
+
+def extrair_link_candidatura(v):
+    apply_options = v.get("apply_options") or []
+    if apply_options and isinstance(apply_options, list):
+        link = apply_options[0].get("link")
+        if link:
+            return link
+
+    # fallback: apply_link (quando existir) ou related_links fora de google.com
+    if v.get("apply_link"):
+        return v["apply_link"]
+
+    related = [
+        rl.get("link", "")
+        for rl in (v.get("related_links") or [])
+        if isinstance(rl, dict) and rl.get("link") and "google.com" not in rl.get("link", "")
+    ]
+    return related[0] if related else "#"
+
+# ======= SerpAPI paginação =======
+# SerpAPI Google Jobs usa next_page_token para paginar. [web:22]
 
 def buscar_vagas_serpapi(params_base, max_paginas=5):
     resultados = []
     params = params_base.copy()
     for _ in range(max_paginas):
-        try:
-            search = GoogleSearch(params)
-            res = search.get_dict()
-            jobs = res.get("jobs_results", [])
-            resultados.extend(jobs)
-            next_token = res.get("serpapi_pagination", {}).get("next_page_token")
-            if not next_token:
-                break
-            params["next_page_token"] = next_token
-        except Exception as e:
-            print(f"[ERRO SERPAPI] {e}")
+        search = GoogleSearch(params)
+        res = search.get_dict()
+        jobs = res.get("jobs_results", []) or []
+        resultados.extend(jobs)
+
+        next_token = (res.get("serpapi_pagination") or {}).get("next_page_token")
+        if not next_token:
             break
+        params["next_page_token"] = next_token
     return resultados
+
+# ======= IA (opcional) apenas para "insight" curto =======
+
+def gerar_insight_ia(perfil, titulo, empresa, descricao, localizacao, match, skills_vaga, skills_inter):
+    if not GEMINI_API_KEY:
+        return "Match calculado localmente."
+
+    client = genai.Client(api_key=GEMINI_API_KEY)
+    prompt = f"""
+Você é um recrutador. Gere um insight curto (máximo 15 palavras) sobre a aderência do candidato à vaga.
+Use o match já calculado (não recalcule).
+
+Match: {match}%
+Skills exigidas detectadas: {skills_vaga}
+Skills do candidato detectadas na vaga: {skills_inter}
+
+Vaga: {titulo} | {empresa} | {localizacao}
+Descrição (trecho): {descricao[:600]}
+
+Responda APENAS JSON:
+{{"insight":"..."}}
+"""
+    try:
+        resp = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=prompt,
+            config=types.GenerateContentConfig(response_mime_type="application/json")
+        )
+        data = json.loads(resp.text)
+        insight = str(data.get("insight", "")).strip()
+        return insight[:120] if insight else "Match calculado localmente."
+    except Exception as e:
+        print(f"[WARN IA] insight falhou: {e}")
+        return "Match calculado localmente."
+
+# ======= HTML =======
+
+HTML_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>IA Job Finder | Rafael Almeida</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0b0e14] text-slate-300 p-4 md:p-10 font-sans">
+  <div class="max-w-4xl mx-auto">
+    <header class="text-center mb-12">
+      <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">JOBS FINDER IA</h1>
+
+      <div class="mt-8 flex flex-wrap justify-center gap-3">
+        <button onclick="setPais('todos')" id="p-todos" class="btn bg-blue-600 px-6 py-2 rounded-xl font-bold">Todos</button>
+        <button onclick="setPais('Brasil')" id="p-Brasil" class="btn bg-slate-800 px-6 py-2 rounded-xl font-bold">🇧🇷 Brasil</button>
+        <button onclick="setPais('Exterior')" id="p-Exterior" class="btn bg-slate-800 px-6 py-2 rounded-xl font-bold">🌍 Exterior</button>
+        <div class="flex items-center gap-2 bg-slate-900 px-4 py-2 rounded-xl border border-slate-800 ml-4">
+          <input type="checkbox" id="remCheck" onchange="apply()" class="w-4 h-4">
+          <label for="remCheck" class="text-xs font-bold text-purple-400 uppercase">Apenas Remoto</label>
+        </div>
+      </div>
+
+      <div class="mt-6 flex flex-wrap justify-center gap-4 text-sm">
+        <span class="bg-slate-800 px-4 py-2 rounded-xl">📋 <span id="cnt-total" class="font-black text-white">0</span> exibidas</span>
+        <span class="bg-slate-800 px-4 py-2 rounded-xl">🔎 <span id="cnt-found" class="font-black text-white">{{ total_found }}</span> encontradas</span>
+        <span class="bg-slate-800 px-4 py-2 rounded-xl">🇧🇷 <span id="cnt-br" class="font-black text-white">0</span> Brasil</span>
+        <span class="bg-slate-800 px-4 py-2 rounded-xl">🌍 <span id="cnt-ext" class="font-black text-white">0</span> Exterior</span>
+        <span class="bg-slate-800 px-4 py-2 rounded-xl">🏠 <span id="cnt-rem" class="font-black text-white">0</span> Remoto</span>
+      </div>
+
+      <p class="mt-4 text-xs text-slate-500">Atualizado: {{ updated_at }}</p>
+    </header>
+
+    <div id="grid-vagas" class="space-y-4">
+      {% for v in vagas %}
+      <div class="vaga-card bg-[#161b26] p-6 rounded-3xl border border-slate-800 transition hover:border-blue-500"
+           data-pais="{{ v.pais }}" data-regime="{{ v.regime }}" data-score="{{ v.score }}">
+        <div class="flex flex-col md:flex-row justify-between gap-4">
+          <div class="flex-1">
+            <div class="flex flex-wrap gap-2 items-center mb-1">
+              <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">{{ v.pais }} • {{ v.regime }}</span>
+              {% if v.regime == 'Remoto' %}
+              <span class="text-[10px] font-black bg-purple-900 text-purple-300 px-2 py-0.5 rounded-full">🏠 REMOTO</span>
+              {% endif %}
+            </div>
+
+            <h2 class="text-xl font-bold text-white mt-1">{{ v.titulo }}</h2>
+            <p class="text-slate-400 text-sm mb-1">{{ v.empresa }} ({{ v.local }})</p>
+            <p class="text-yellow-400 text-sm font-bold mb-3">💰 {{ v.salario }}</p>
+
+            <p class="text-slate-300 text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-emerald-500">
+              {{ v.analise }}
+            </p>
+
+            {% if v.skills_inter %}
+            <p class="mt-3 text-xs text-slate-400">
+              Skills em comum: {{ v.skills_inter|join(', ') }}
+            </p>
+            {% endif %}
+          </div>
+
+          <div class="text-center md:text-right min-w-[120px]">
+            <div class="text-4xl font-black text-emerald-400">{{ v.score }}%</div>
+            <div class="text-[10px] text-slate-500 mt-1 uppercase">compatibilidade</div>
+            <a href="{{ v.link }}" target="_blank" rel="noopener noreferrer"
+               class="block mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl">
+               CANDIDATAR
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <script>
+    let paisF = 'todos';
+
+    function setPais(p) {
+      paisF = p;
+      document.querySelectorAll('.btn').forEach(b => {
+        b.classList.remove('bg-blue-600');
+        b.classList.add('bg-slate-800');
+      });
+      const btn = document.getElementById('p-' + p);
+      if (btn) { btn.classList.remove('bg-slate-800'); btn.classList.add('bg-blue-600'); }
+      apply();
+    }
+
+    function apply() {
+      const rem = document.getElementById('remCheck').checked;
+      let total = 0, br = 0, ext = 0, remCnt = 0;
+
+      document.querySelectorAll('.vaga-card').forEach(c => {
+        if (c.dataset.pais === 'Brasil') br++;
+        if (c.dataset.pais === 'Exterior') ext++;
+        if (c.dataset.regime === 'Remoto') remCnt++;
+
+        const mP = paisF === 'todos' || c.dataset.pais === paisF;
+        const mR = !rem || c.dataset.regime === 'Remoto';
+        const visible = mP && mR;
+
+        c.style.display = visible ? 'block' : 'none';
+        if (visible) total++;
+      });
+
+      document.getElementById('cnt-total').textContent = total;
+      document.getElementById('cnt-br').textContent = br;
+      document.getElementById('cnt-ext').textContent = ext;
+      document.getElementById('cnt-rem').textContent = remCnt;
+    }
+
+    window.onload = () => {
+      const g = document.getElementById('grid-vagas');
+      const cards = Array.from(g.children);
+      cards.sort((a, b) => Number(b.dataset.score) - Number(a.dataset.score));
+      cards.forEach(c => g.appendChild(c));
+      apply();
+    }
+  </script>
+</body>
+</html>
+"""
+
+# ======= Main =======
 
 def executar():
     perfil = carregar_perfil()
@@ -107,24 +359,24 @@ def executar():
         # Brasil
         {"q": "Analista BI",                         "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
         {"q": "Analista Business Intelligence",       "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "Analista BI Pleno Senior",            "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "Performance Marketing Meta Ads",       "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "Gestor Trafego Pago",                 "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "Analista Marketing Digital",           "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Power BI",                             "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Microsoft Fabric Power BI",            "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
         {"q": "Analista Dados SQL Python",           "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "BI Developer Power BI",               "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "Data Analyst Python",                 "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Performance Marketing Meta Ads",       "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Gestor Trafego Pago",                  "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+
         # Exterior / Remoto
-        {"q": "BI Analyst Remote",                   "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
-        {"q": "Business Intelligence Remote",        "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
-        {"q": "Performance Marketing Remote",        "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
-        {"q": "Python Automation Specialist Remote", "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
-        {"q": "Data Analyst Remote SQL Python",      "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
-        {"q": "Marketing Analytics Remote",          "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
+        {"q": "BI Analyst Remote",                    "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
+        {"q": "Business Intelligence Remote",         "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
+        {"q": "Power BI Developer Remote",            "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
+        {"q": "Python Automation Specialist Remote",   "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
+        {"q": "Marketing Analytics Remote",           "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
     ]
 
     vagas_list = []
     vistos = set()
+
+    total_bruto = 0
 
     for item in queries:
         params_base = {
@@ -134,10 +386,11 @@ def executar():
             "gl": item.get("gl", "us"),
             "hl": item.get("hl", "en"),
         }
-        if item["loc"]:
+        if item.get("loc"):
             params_base["location"] = item["loc"]
 
-        results = buscar_vagas_serpapi(params_base, max_paginas=5)
+        results = buscar_vagas_serpapi(params_base, max_paginas=MAX_PAGINAS_POR_QUERY)
+        total_bruto += len(results)
         print(f"[INFO] '{item['q']}' → {len(results)} vagas brutas")
 
         for v in results:
@@ -146,137 +399,60 @@ def executar():
                 continue
             vistos.add(jid)
 
-            titulo      = v.get('title', '')
-            empresa     = v.get('company_name', '')
+            titulo = v.get("title", "")
+            empresa = v.get("company_name", "")
             localizacao = v.get("location", "N/D")
-            descricao   = v.get("description", "")
-            regime      = detectar_regime(titulo, descricao, localizacao)
+            descricao = v.get("description", "")
+            extensoes = v.get("extensions") or []
 
-            apply_options = v.get("apply_options", [])
-            if apply_options:
-                link_vaga = apply_options[0].get("link", "#")
-            else:
-                related = [
-                    rl.get("link", "")
-                    for rl in v.get("related_links", [])
-                    if "google.com" not in rl.get("link", "")
-                ]
-                link_vaga = related[0] if related else "#"
+            pais = item["pais_label"]
+            regime = detectar_regime(titulo, descricao, localizacao, extensoes)
 
-            m, salario, mot = analisar_vaga_ia(perfil, titulo, empresa, descricao, localizacao)
+            link_vaga = extrair_link_candidatura(v)
+            salario = salario_estimado(v, pais)
+
+            # MATCH: local (não zera por falha de IA)
+            match, skills_perfil, skills_vaga, skills_inter = calcular_match_local(
+                perfil_txt=perfil,
+                titulo=titulo,
+                descricao=descricao,
+                localizacao=localizacao
+            )
+
+            # Insight: IA opcional e limitada para custo
+            analise = "Match calculado localmente."
+            if len(vagas_list) < MAX_VAGAS_PARA_INSIGHT_IA:
+                analise = gerar_insight_ia(perfil, titulo, empresa, descricao, localizacao, match, skills_vaga, skills_inter)
 
             vagas_list.append({
-                "titulo": titulo, "empresa": empresa,
-                "link": link_vaga, "local": localizacao,
-                "score": m, "salario": salario,
-                "pais": item["pais_label"],
-                "regime": regime, "analise": mot
+                "titulo": titulo,
+                "empresa": empresa,
+                "link": link_vaga,
+                "local": localizacao,
+                "score": match,
+                "salario": salario,
+                "pais": pais,
+                "regime": regime,
+                "analise": analise,
+                "skills_inter": skills_inter,
             })
 
-    print(f"[TOTAL] {len(vagas_list)} vagas únicas processadas.")
+    # Ordena por score desc
+    vagas_list.sort(key=lambda x: x.get("score", 0), reverse=True)
 
-    html_template = """
-    <!DOCTYPE html>
-    <html lang="pt-br">
-    <head>
-        <meta charset="UTF-8">
-        <title>IA Job Finder | Rafael Almeida</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-    </head>
-    <body class="bg-[#0b0e14] text-slate-300 p-4 md:p-10 font-sans">
-        <div class="max-w-4xl mx-auto">
-            <header class="text-center mb-12">
-                <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">JOBS FINDER IA</h1>
-                <div class="mt-8 flex flex-wrap justify-center gap-3">
-                    <button onclick="setPais('todos')" id="p-todos" class="btn bg-blue-600 px-6 py-2 rounded-xl font-bold">Todos</button>
-                    <button onclick="setPais('Brasil')" id="p-Brasil" class="btn bg-slate-800 px-6 py-2 rounded-xl font-bold">🇧🇷 Brasil</button>
-                    <button onclick="setPais('Exterior')" id="p-Exterior" class="btn bg-slate-800 px-6 py-2 rounded-xl font-bold">🌍 Exterior</button>
-                    <div class="flex items-center gap-2 bg-slate-900 px-4 py-2 rounded-xl border border-slate-800 ml-4">
-                        <input type="checkbox" id="remCheck" onchange="apply()" class="w-4 h-4">
-                        <label for="remCheck" class="text-xs font-bold text-purple-400 uppercase">Apenas Remoto</label>
-                    </div>
-                </div>
-                <div class="mt-6 flex flex-wrap justify-center gap-4 text-sm">
-                    <span class="bg-slate-800 px-4 py-2 rounded-xl">📋 <span id="cnt-total" class="font-black text-white">0</span> vagas exibidas</span>
-                    <span class="bg-slate-800 px-4 py-2 rounded-xl">🇧🇷 <span id="cnt-br" class="font-black text-white">0</span> Brasil</span>
-                    <span class="bg-slate-800 px-4 py-2 rounded-xl">🌍 <span id="cnt-ext" class="font-black text-white">0</span> Exterior</span>
-                    <span class="bg-slate-800 px-4 py-2 rounded-xl">🏠 <span id="cnt-rem" class="font-black text-white">0</span> Remoto</span>
-                </div>
-            </header>
+    updated_at = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
 
-            <div id="grid-vagas" class="space-y-4">
-                {% for v in vagas %}
-                <div class="vaga-card bg-[#161b26] p-6 rounded-3xl border border-slate-800 transition hover:border-blue-500"
-                     data-pais="{{ v.pais }}" data-regime="{{ v.regime }}" data-score="{{ v.score }}">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex flex-wrap gap-2 items-center mb-1">
-                                <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">{{ v.pais }} • {{ v.regime }}</span>
-                                {% if v.regime == 'Remoto' %}
-                                <span class="text-[10px] font-black bg-purple-900 text-purple-300 px-2 py-0.5 rounded-full">🏠 REMOTO</span>
-                                {% endif %}
-                            </div>
-                            <h2 class="text-xl font-bold text-white mt-1">{{ v.titulo }}</h2>
-                            <p class="text-slate-400 text-sm mb-1">{{ v.empresa }} ({{ v.local }})</p>
-                            <p class="text-yellow-400 text-sm font-bold mb-4">💰 {{ v.salario }}</p>
-                            <p class="text-slate-300 text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-emerald-500">{{ v.analise }}</p>
-                        </div>
-                        <div class="text-center md:text-right min-w-[120px]">
-                            <div class="text-4xl font-black text-emerald-400">{{ v.score }}%</div>
-                            <div class="text-[10px] text-slate-500 mt-1 uppercase">compatibilidade</div>
-                            <a href="{{ v.link }}" target="_blank" rel="noopener noreferrer"
-                               class="block mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl">
-                               CANDIDATAR
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        <script>
-            let paisF = 'todos';
-            function setPais(p) {
-                paisF = p;
-                document.querySelectorAll('.btn').forEach(b => {
-                    b.classList.remove('bg-blue-600');
-                    b.classList.add('bg-slate-800');
-                });
-                const btn = document.getElementById('p-' + p);
-                if (btn) { btn.classList.remove('bg-slate-800'); btn.classList.add('bg-blue-600'); }
-                apply();
-            }
-            function apply() {
-                const rem = document.getElementById('remCheck').checked;
-                let total = 0, br = 0, ext = 0, remCnt = 0;
-                document.querySelectorAll('.vaga-card').forEach(c => {
-                    if (c.dataset.pais === 'Brasil') br++;
-                    if (c.dataset.pais === 'Exterior') ext++;
-                    if (c.dataset.regime === 'Remoto') remCnt++;
-                    const mP = paisF === 'todos' || c.dataset.pais === paisF;
-                    const mR = !rem || c.dataset.regime === 'Remoto';
-                    const visible = mP && mR;
-                    c.style.display = visible ? 'block' : 'none';
-                    if (visible) total++;
-                });
-                document.getElementById('cnt-total').textContent = total;
-                document.getElementById('cnt-br').textContent = br;
-                document.getElementById('cnt-ext').textContent = ext;
-                document.getElementById('cnt-rem').textContent = remCnt;
-            }
-            window.onload = () => {
-                const g = document.getElementById('grid-vagas');
-                const cards = Array.from(g.children);
-                cards.sort((a, b) => Number(b.dataset.score) - Number(a.dataset.score));
-                cards.forEach(c => g.appendChild(c));
-                apply();
-            }
-        </script>
-    </body>
-    </html>
-    """
+    html = Template(HTML_TEMPLATE).render(
+        vagas=vagas_list,
+        total_found=len(vagas_list),
+        updated_at=updated_at
+    )
+
     with open("index.html", "w", encoding="utf-8") as f:
-        f.write(Template(html_template).render(vagas=vagas_list))
+        f.write(html)
+
+    print(f"[TOTAL] bruto={total_bruto} | unicas={len(vagas_list)} | IA_insights={min(len(vagas_list), MAX_VAGAS_PARA_INSIGHT_IA)}")
+
 
 if __name__ == "__main__":
     executar()
