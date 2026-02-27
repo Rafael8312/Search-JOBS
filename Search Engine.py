@@ -25,18 +25,25 @@ def carregar_perfil():
         return ""
 
 def avaliar_vaga_com_ia(perfil, descricao_vaga):
-    """O Gemini avalia a vaga com nota de corte de 70%."""
     model = genai.GenerativeModel('gemini-1.5-flash')
     prompt = f"""
-    Candidato: Rafael de Almeida Soares.
-    Perfil: {perfil}
-    Vaga: {descricao_vaga}
+    Você é um Recrutador Tech focado em encontrar o melhor match para Rafael Almeida.
     
-    TAREFA:
-    1. Avalie a compatibilidade (0-100%).
-    2. Foque em: Python, BI, Meta Ads e Experiência Comercial/Telecom.
-    3. Se o match for >= 70%, responda: 'APROVADO | [Nota]% | [Resumo curto]'.
-    4. Caso contrário, responda: 'REPROVADO'.
+    PERFIL DO RAFAEL:
+    {perfil}
+    
+    DESCRIÇÃO DA VAGA:
+    {descricao_vaga}
+    
+    SUA MISSÃO:
+    1. Identifique se a vaga pede Python, BI, Automação, Gestão de Dados ou Performance.
+    2. O Rafael tem 15 anos de Telecom e Gestão. Considere isso como maturidade profissional.
+    3. Seja flexível: se ele domina Python e BI, ele pode atuar em BI de qualquer setor.
+    4. Se o match técnico for honestamente acima de 50%, considere APROVADO para este teste.
+    
+    SAÍDA (Siga rigorosamente):
+    - Se aprovado: 'APROVADO | [Nota]% | [Explique por que as habilidades de BI/Python dele servem aqui]'
+    - Se reprovado: 'REPROVADO'
     """
     try:
         response = model.generate_content(prompt)
@@ -163,3 +170,4 @@ def buscar_e_gerar():
 
 if __name__ == "__main__":
     buscar_e_gerar()
+
