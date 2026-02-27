@@ -3,20 +3,38 @@
     <html lang="pt-br">
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>AI Job Matcher | Rafael Almeida</title>
         <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            body { background-color: #0f172a; color: #f8fafc; }
+            .job-card { background: #1e293b; border-left: 4px solid #38bdf8; transition: 0.3s; }
+            .job-card:hover { transform: scale(1.01); border-color: #818cf8; }
+            .btn-update { border: 1px solid #38bdf8; color: #38bdf8; transition: 0.3s; }
+            .btn-update:hover { background: #38bdf8; color: #0f172a; }
+        </style>
     </head>
-    <body class="bg-slate-900 text-white p-10">
-        <header class="max-w-5xl mx-auto mb-10 flex justify-between items-center">
+    <body class="p-6 md:p-12">
+        <header class="max-w-5xl mx-auto mb-12 flex flex-col md:row justify-between items-center gap-6">
             <div>
-                <h1 class="text-3xl font-bold">Minhas Vagas <span class="text-blue-400">80% Match</span></h1>
-                <p class="text-slate-400">Última atualização: 27/02/2026 15:55</p>
+                <h1 class="text-3xl font-bold">Vagas <span class="text-blue-400">Match 70%+</span></h1>
+                <p class="text-slate-400">Filtro inteligente para Rafael de Almeida Soares</p>
             </div>
-            <a href="https://github.com/Rafael8312/Search-JOBS/actions" target="_blank" class="bg-transparent border border-blue-400 text-blue-400 px-4 py-2 rounded-lg hover:bg-blue-400 hover:text-slate-900 transition font-bold">
-                🔄 Atualizar Vagas (Start Manual)
-            </a>
+            <div class="text-right">
+                <a href="https://github.com/Rafael8312/Search-JOBS/actions" target="_blank" class="btn-update px-5 py-2 rounded-full text-sm font-bold inline-block mb-2">
+                    🔄 Atualizar Painel
+                </a>
+                <p class="text-[10px] text-slate-500 uppercase tracking-widest">Última Varredura: 27/02/2026 16:10</p>
+            </div>
         </header>
+
         <main class="max-w-5xl mx-auto grid gap-6">
+            
+            
+            
+            <div class="text-center py-20 border-2 border-dashed border-slate-800 rounded-3xl">
+                <p class="text-slate-500 italic">Nenhum match de 70% encontrado nas buscas de hoje. Tente atualizar mais tarde.</p>
+            </div>
             
         </main>
     </body>
