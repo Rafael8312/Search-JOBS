@@ -2,18 +2,16 @@ import os
 import json
 import re
 from serpapi import GoogleSearch
-import google.generativeai as genai
+from google import genai                        # NOVO SDK
+from google.genai import types                  # NOVO SDK
 from jinja2 import Template
 
-SERP_API_KEY = os.getenv("SERP_API_KEY")
+SERP_API_KEY  = os.getenv("SERP_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# CORREÇÃO 2: response_mime_type força JSON puro, sem markdown
-genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel(
-    'gemini-1.5-flash',
-    generation_config={"response_mime_type": "application/json"}
-)
+# NOVO SDK: client em vez de configure()
+client = genai.Client(api_key=GEMINI_API_KEY)
+GEMINI_MODEL = "gemini-2.0-flash"              # modelo disponível no novo SDK
 
 def carregar_perfil():
     try:
@@ -41,24 +39,49 @@ Empresa: {empresa}
 Localização: {localizacao}
 Descrição: {descricao[:1000]}
 
-Retorne um JSON com exatamente estas chaves:
-- "match": inteiro de 0 a 100 (porcentagem de competências da vaga que o candidato possui)
-- "salario": string com faixa salarial estimada em Reais para este cargo/empresa/localidade em 2026
-- "insight": string de no máximo 15 palavras sobre o match
+INSTRUÇÕES:
+1. Liste as competências exigidas pela vaga.
+2. Identifique quais o candidato possui.
+3. Calcule: match = (competências que o candidato possui / total exigido) * 100, arredonde para inteiro.
+4. Estime a faixa salarial mensal em R$ para este cargo em 2026, considerando empresa e localidade.
+5. Escreva um insight de no máximo 15 palavras sobre o match.
+
+Retorne APENAS JSON puro com exatamente estas chaves:
+{{"match": <inteiro 0-100>, "salario": "<ex: R$ 8.000 - R$ 12.000>", "insight": "<máximo 15 palavras>"}}
 """
+    response_text = ""
     try:
-        response = model.generate_content(prompt)
-        data = json.loads(response.text)
+        # NOVO SDK com JSON mode garantido
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json"
+            )
+        )
+        response_text = response.text
+        data = json.loads(response_text)
         return (
             int(data.get('match', 0)),
             str(data.get('salario', 'Não estimado')),
             str(data.get('insight', 'Análise inconclusiva.'))
         )
+    except json.JSONDecodeError as e:
+        # Fallback: tenta extrair JSON mesmo com lixo ao redor
+        json_match = re.search(r'\{.*?\}', response_text, re.DOTALL)
+        if json_match:
+            try:
+                data = json.loads(json_match.group())
+                return int(data.get('match', 0)), str(data.get('salario', 'N/D')), str(data.get('insight', ''))
+            except:
+                pass
+        print(f"[ERRO JSON] {titulo} | {e} | Resposta: {response_text[:200]}")
+        return 0, "Não estimado", "Erro ao interpretar resposta da IA."
     except Exception as e:
-        print(f"[ERRO IA] {titulo} | {e} | Resposta: {getattr(response, 'text', 'N/A')[:200]}")
+        # CORRIGIDO: response_text inicializado antes, sem UnboundLocalError
+        print(f"[ERRO IA] {titulo} | {e} | Resposta: {response_text[:200]}")
         return 0, "Não estimado", "Erro técnico na análise."
 
-# CORREÇÃO 1: Paginação completa via next_page_token
 def buscar_vagas_serpapi(params_base, max_paginas=5):
     resultados = []
     params = params_base.copy()
@@ -80,25 +103,24 @@ def buscar_vagas_serpapi(params_base, max_paginas=5):
 def executar():
     perfil = carregar_perfil()
 
-    # Mais queries cobrindo diferentes ângulos do perfil
     queries = [
         # Brasil
-        {"q": "Analista BI",                          "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "Analista Business Intelligence",        "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "Analista BI Pleno Senior",             "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "Performance Marketing Meta Ads",        "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "Gestor Trafego Pago",                  "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "Analista Marketing Digital",            "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "Analista Dados SQL Python",            "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "BI Developer Power BI",                "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
-        {"q": "Data Analyst Python",                  "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Analista BI",                         "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Analista Business Intelligence",       "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Analista BI Pleno Senior",            "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Performance Marketing Meta Ads",       "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Gestor Trafego Pago",                 "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Analista Marketing Digital",           "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Analista Dados SQL Python",           "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "BI Developer Power BI",               "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Data Analyst Python",                 "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
         # Exterior / Remoto
-        {"q": "BI Analyst Remote",                    "loc": None,     "gl": "us", "hl": "en",    "pais_label": "Exterior"},
-        {"q": "Business Intelligence Remote",         "loc": None,     "gl": "us", "hl": "en",    "pais_label": "Exterior"},
-        {"q": "Performance Marketing Remote",         "loc": None,     "gl": "us", "hl": "en",    "pais_label": "Exterior"},
-        {"q": "Python Automation Specialist Remote",  "loc": None,     "gl": "us", "hl": "en",    "pais_label": "Exterior"},
-        {"q": "Data Analyst Remote SQL Python",       "loc": None,     "gl": "us", "hl": "en",    "pais_label": "Exterior"},
-        {"q": "Marketing Analytics Remote",           "loc": None,     "gl": "us", "hl": "en",    "pais_label": "Exterior"},
+        {"q": "BI Analyst Remote",                   "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
+        {"q": "Business Intelligence Remote",        "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
+        {"q": "Performance Marketing Remote",        "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
+        {"q": "Python Automation Specialist Remote", "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
+        {"q": "Data Analyst Remote SQL Python",      "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
+        {"q": "Marketing Analytics Remote",          "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
     ]
 
     vagas_list = []
@@ -124,12 +146,11 @@ def executar():
                 continue
             vistos.add(jid)
 
-            titulo    = v.get('title', '')
-            empresa   = v.get('company_name', '')
+            titulo      = v.get('title', '')
+            empresa     = v.get('company_name', '')
             localizacao = v.get("location", "N/D")
-            descricao = v.get("description", "")
-
-            regime = detectar_regime(titulo, descricao, localizacao)
+            descricao   = v.get("description", "")
+            regime      = detectar_regime(titulo, descricao, localizacao)
 
             apply_options = v.get("apply_options", [])
             if apply_options:
@@ -166,7 +187,6 @@ def executar():
         <div class="max-w-4xl mx-auto">
             <header class="text-center mb-12">
                 <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">JOBS FINDER IA</h1>
-
                 <div class="mt-8 flex flex-wrap justify-center gap-3">
                     <button onclick="setPais('todos')" id="p-todos" class="btn bg-blue-600 px-6 py-2 rounded-xl font-bold">Todos</button>
                     <button onclick="setPais('Brasil')" id="p-Brasil" class="btn bg-slate-800 px-6 py-2 rounded-xl font-bold">🇧🇷 Brasil</button>
@@ -176,21 +196,11 @@ def executar():
                         <label for="remCheck" class="text-xs font-bold text-purple-400 uppercase">Apenas Remoto</label>
                     </div>
                 </div>
-
-                <!-- NOVO: Contador de vagas -->
-                <div class="mt-6 flex justify-center gap-6 text-sm">
-                    <span class="bg-slate-800 px-4 py-2 rounded-xl">
-                        📋 <span id="cnt-total" class="font-black text-white">0</span> vagas exibidas
-                    </span>
-                    <span class="bg-slate-800 px-4 py-2 rounded-xl">
-                        🇧🇷 <span id="cnt-br" class="font-black text-white">0</span> Brasil
-                    </span>
-                    <span class="bg-slate-800 px-4 py-2 rounded-xl">
-                        🌍 <span id="cnt-ext" class="font-black text-white">0</span> Exterior
-                    </span>
-                    <span class="bg-slate-800 px-4 py-2 rounded-xl">
-                        🏠 <span id="cnt-rem" class="font-black text-white">0</span> Remoto
-                    </span>
+                <div class="mt-6 flex flex-wrap justify-center gap-4 text-sm">
+                    <span class="bg-slate-800 px-4 py-2 rounded-xl">📋 <span id="cnt-total" class="font-black text-white">0</span> vagas exibidas</span>
+                    <span class="bg-slate-800 px-4 py-2 rounded-xl">🇧🇷 <span id="cnt-br" class="font-black text-white">0</span> Brasil</span>
+                    <span class="bg-slate-800 px-4 py-2 rounded-xl">🌍 <span id="cnt-ext" class="font-black text-white">0</span> Exterior</span>
+                    <span class="bg-slate-800 px-4 py-2 rounded-xl">🏠 <span id="cnt-rem" class="font-black text-white">0</span> Remoto</span>
                 </div>
             </header>
 
@@ -224,10 +234,8 @@ def executar():
                 {% endfor %}
             </div>
         </div>
-
         <script>
             let paisF = 'todos';
-
             function setPais(p) {
                 paisF = p;
                 document.querySelectorAll('.btn').forEach(b => {
@@ -238,30 +246,24 @@ def executar():
                 if (btn) { btn.classList.remove('bg-slate-800'); btn.classList.add('bg-blue-600'); }
                 apply();
             }
-
             function apply() {
                 const rem = document.getElementById('remCheck').checked;
                 let total = 0, br = 0, ext = 0, remCnt = 0;
-
                 document.querySelectorAll('.vaga-card').forEach(c => {
+                    if (c.dataset.pais === 'Brasil') br++;
+                    if (c.dataset.pais === 'Exterior') ext++;
+                    if (c.dataset.regime === 'Remoto') remCnt++;
                     const mP = paisF === 'todos' || c.dataset.pais === paisF;
                     const mR = !rem || c.dataset.regime === 'Remoto';
                     const visible = mP && mR;
                     c.style.display = visible ? 'block' : 'none';
-
-                    // Contadores (sempre conta todos, independente do filtro ativo)
-                    if (c.dataset.pais === 'Brasil') br++;
-                    if (c.dataset.pais === 'Exterior') ext++;
-                    if (c.dataset.regime === 'Remoto') remCnt++;
                     if (visible) total++;
                 });
-
                 document.getElementById('cnt-total').textContent = total;
                 document.getElementById('cnt-br').textContent = br;
                 document.getElementById('cnt-ext').textContent = ext;
                 document.getElementById('cnt-rem').textContent = remCnt;
             }
-
             window.onload = () => {
                 const g = document.getElementById('grid-vagas');
                 const cards = Array.from(g.children);
