@@ -9,8 +9,8 @@ SERP_API_KEY = os.getenv("SERP_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # Substitua com o seu usuário e nome do repositório para o botão de atalho funcionar
-GITHUB_USER = "SEU_USUARIO"
-GITHUB_REPO = "SEU_REPOSITORIO"
+GITHUB_USER = "Rafael8312"
+GITHUB_REPO = "Search-JOBS"
 
 genai.configure(api_key=GEMINI_API_KEY)
 
@@ -165,3 +165,4 @@ def buscar_e_gerar():
 
 if __name__ == "__main__":
     buscar_e_gerar()
+
