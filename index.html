@@ -1,0 +1,277 @@
+
+    <!DOCTYPE html>
+    <html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <title>IA Job Finder | Rafael Almeida</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="bg-[#0b0e14] text-slate-300 p-4 md:p-10 font-sans">
+        <div class="max-w-4xl mx-auto">
+            <header class="text-center mb-12">
+                <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">JOBS FINDER IA</h1>
+                <div class="mt-8 flex flex-wrap justify-center gap-3">
+                    <button onclick="setPais('todos')" id="p-todos" class="btn bg-blue-600 px-6 py-2 rounded-xl font-bold">Todos</button>
+                    <button onclick="setPais('Brasil')" id="p-Brasil" class="btn bg-slate-800 px-6 py-2 rounded-xl font-bold">🇧🇷 Brasil</button>
+                    <button onclick="setPais('Exterior')" id="p-Exterior" class="btn bg-slate-800 px-6 py-2 rounded-xl font-bold">🌍 Exterior</button>
+                    <div class="flex items-center gap-2 bg-slate-900 px-4 py-2 rounded-xl border border-slate-800 ml-4">
+                        <input type="checkbox" id="remCheck" onchange="apply()" class="w-4 h-4">
+                        <label for="remCheck" class="text-xs font-bold text-purple-400 uppercase">Apenas Remoto</label>
+                    </div>
+                </div>
+            </header>
+
+            <div id="grid-vagas" class="space-y-4">
+                
+                <div class="vaga-card bg-[#161b26] p-6 rounded-3xl border border-slate-800 transition hover:border-blue-500" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex flex-col md:flex-row justify-between gap-4">
+                        <div class="flex-1">
+                            <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Exterior • Presencial</span>
+                            <h2 class="text-xl font-bold text-white mt-1">Analista de B.i</h2>
+                            <p class="text-slate-400 text-sm mb-4">Leveros (Assis, SP)</p>
+                            <p class="text-slate-300 text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-emerald-500">Erro técnico na análise.</p>
+                        </div>
+                        <div class="text-center md:text-right min-w-[120px]">
+                            <div class="text-4xl font-black text-emerald-400">0%</div>
+                            <a href="#" target="_blank" class="block mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl">CANDIDATAR</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vaga-card bg-[#161b26] p-6 rounded-3xl border border-slate-800 transition hover:border-blue-500" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex flex-col md:flex-row justify-between gap-4">
+                        <div class="flex-1">
+                            <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Exterior • Presencial</span>
+                            <h2 class="text-xl font-bold text-white mt-1">Analista de BI e MIS Pleno</h2>
+                            <p class="text-slate-400 text-sm mb-4">TP (Araraquara, SP)</p>
+                            <p class="text-slate-300 text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-emerald-500">Erro técnico na análise.</p>
+                        </div>
+                        <div class="text-center md:text-right min-w-[120px]">
+                            <div class="text-4xl font-black text-emerald-400">0%</div>
+                            <a href="#" target="_blank" class="block mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl">CANDIDATAR</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vaga-card bg-[#161b26] p-6 rounded-3xl border border-slate-800 transition hover:border-blue-500" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex flex-col md:flex-row justify-between gap-4">
+                        <div class="flex-1">
+                            <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Exterior • Presencial</span>
+                            <h2 class="text-xl font-bold text-white mt-1">Analista de BI Sr.</h2>
+                            <p class="text-slate-400 text-sm mb-4">EXAME (São Paulo, SP)</p>
+                            <p class="text-slate-300 text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-emerald-500">Erro técnico na análise.</p>
+                        </div>
+                        <div class="text-center md:text-right min-w-[120px]">
+                            <div class="text-4xl font-black text-emerald-400">0%</div>
+                            <a href="#" target="_blank" class="block mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl">CANDIDATAR</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vaga-card bg-[#161b26] p-6 rounded-3xl border border-slate-800 transition hover:border-blue-500" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex flex-col md:flex-row justify-between gap-4">
+                        <div class="flex-1">
+                            <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Exterior • Presencial</span>
+                            <h2 class="text-xl font-bold text-white mt-1">Analista de BI - SR | SAP BO e Qlik Sense</h2>
+                            <p class="text-slate-400 text-sm mb-4">Objective (Qualquer lugar)</p>
+                            <p class="text-slate-300 text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-emerald-500">Erro técnico na análise.</p>
+                        </div>
+                        <div class="text-center md:text-right min-w-[120px]">
+                            <div class="text-4xl font-black text-emerald-400">0%</div>
+                            <a href="#" target="_blank" class="block mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl">CANDIDATAR</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vaga-card bg-[#161b26] p-6 rounded-3xl border border-slate-800 transition hover:border-blue-500" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex flex-col md:flex-row justify-between gap-4">
+                        <div class="flex-1">
+                            <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Exterior • Presencial</span>
+                            <h2 class="text-xl font-bold text-white mt-1">Analista de BI / Dados (Pleno ou Sênior)</h2>
+                            <p class="text-slate-400 text-sm mb-4">HOOBOX Robotics (São Paulo, SP)</p>
+                            <p class="text-slate-300 text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-emerald-500">Erro técnico na análise.</p>
+                        </div>
+                        <div class="text-center md:text-right min-w-[120px]">
+                            <div class="text-4xl font-black text-emerald-400">0%</div>
+                            <a href="#" target="_blank" class="block mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl">CANDIDATAR</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vaga-card bg-[#161b26] p-6 rounded-3xl border border-slate-800 transition hover:border-blue-500" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex flex-col md:flex-row justify-between gap-4">
+                        <div class="flex-1">
+                            <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Exterior • Presencial</span>
+                            <h2 class="text-xl font-bold text-white mt-1">Analista de BI</h2>
+                            <p class="text-slate-400 text-sm mb-4">BESTBUYHOTEL VIAGENS E TURISMO LTDA. (Jundiaí - Aglomeração Urbana de Jundiaí, Jundiaí - SP)</p>
+                            <p class="text-slate-300 text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-emerald-500">Erro técnico na análise.</p>
+                        </div>
+                        <div class="text-center md:text-right min-w-[120px]">
+                            <div class="text-4xl font-black text-emerald-400">0%</div>
+                            <a href="#" target="_blank" class="block mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl">CANDIDATAR</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vaga-card bg-[#161b26] p-6 rounded-3xl border border-slate-800 transition hover:border-blue-500" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex flex-col md:flex-row justify-between gap-4">
+                        <div class="flex-1">
+                            <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Exterior • Presencial</span>
+                            <h2 class="text-xl font-bold text-white mt-1">ANALISTA DE BI JR</h2>
+                            <p class="text-slate-400 text-sm mb-4">VIXPar (Araraquara, SP)</p>
+                            <p class="text-slate-300 text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-emerald-500">Erro técnico na análise.</p>
+                        </div>
+                        <div class="text-center md:text-right min-w-[120px]">
+                            <div class="text-4xl font-black text-emerald-400">0%</div>
+                            <a href="#" target="_blank" class="block mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl">CANDIDATAR</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vaga-card bg-[#161b26] p-6 rounded-3xl border border-slate-800 transition hover:border-blue-500" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex flex-col md:flex-row justify-between gap-4">
+                        <div class="flex-1">
+                            <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Exterior • Presencial</span>
+                            <h2 class="text-xl font-bold text-white mt-1">ANALISTA BI SR</h2>
+                            <p class="text-slate-400 text-sm mb-4">Stefanini Brasil (Taboão da Serra, SP)</p>
+                            <p class="text-slate-300 text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-emerald-500">Erro técnico na análise.</p>
+                        </div>
+                        <div class="text-center md:text-right min-w-[120px]">
+                            <div class="text-4xl font-black text-emerald-400">0%</div>
+                            <a href="#" target="_blank" class="block mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl">CANDIDATAR</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vaga-card bg-[#161b26] p-6 rounded-3xl border border-slate-800 transition hover:border-blue-500" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex flex-col md:flex-row justify-between gap-4">
+                        <div class="flex-1">
+                            <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Exterior • Presencial</span>
+                            <h2 class="text-xl font-bold text-white mt-1">Analista de BI e MIS Pleno</h2>
+                            <p class="text-slate-400 text-sm mb-4">TP (Cabedelo - Jacaré, Cabedelo - PB)</p>
+                            <p class="text-slate-300 text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-emerald-500">Erro técnico na análise.</p>
+                        </div>
+                        <div class="text-center md:text-right min-w-[120px]">
+                            <div class="text-4xl font-black text-emerald-400">0%</div>
+                            <a href="#" target="_blank" class="block mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl">CANDIDATAR</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vaga-card bg-[#161b26] p-6 rounded-3xl border border-slate-800 transition hover:border-blue-500" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex flex-col md:flex-row justify-between gap-4">
+                        <div class="flex-1">
+                            <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Exterior • Presencial</span>
+                            <h2 class="text-xl font-bold text-white mt-1">Analista de Projeto e Processos (Dados & BI)</h2>
+                            <p class="text-slate-400 text-sm mb-4">VERY TECNOLOGIA S.A. (Teresina, PI)</p>
+                            <p class="text-slate-300 text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-emerald-500">Erro técnico na análise.</p>
+                        </div>
+                        <div class="text-center md:text-right min-w-[120px]">
+                            <div class="text-4xl font-black text-emerald-400">0%</div>
+                            <a href="#" target="_blank" class="block mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl">CANDIDATAR</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vaga-card bg-[#161b26] p-6 rounded-3xl border border-slate-800 transition hover:border-blue-500" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex flex-col md:flex-row justify-between gap-4">
+                        <div class="flex-1">
+                            <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Exterior • Presencial</span>
+                            <h2 class="text-xl font-bold text-white mt-1">Vibe Coding Specialist Python Automation</h2>
+                            <p class="text-slate-400 text-sm mb-4">OpenTrain AI (Anywhere)</p>
+                            <p class="text-slate-300 text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-emerald-500">Erro técnico na análise.</p>
+                        </div>
+                        <div class="text-center md:text-right min-w-[120px]">
+                            <div class="text-4xl font-black text-emerald-400">0%</div>
+                            <a href="#" target="_blank" class="block mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl">CANDIDATAR</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vaga-card bg-[#161b26] p-6 rounded-3xl border border-slate-800 transition hover:border-blue-500" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex flex-col md:flex-row justify-between gap-4">
+                        <div class="flex-1">
+                            <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Exterior • Presencial</span>
+                            <h2 class="text-xl font-bold text-white mt-1">Tech VA: n8n + Python Expert for Data Scraping and Automation</h2>
+                            <p class="text-slate-400 text-sm mb-4">Upwork (Anywhere)</p>
+                            <p class="text-slate-300 text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-emerald-500">Erro técnico na análise.</p>
+                        </div>
+                        <div class="text-center md:text-right min-w-[120px]">
+                            <div class="text-4xl font-black text-emerald-400">0%</div>
+                            <a href="#" target="_blank" class="block mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl">CANDIDATAR</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vaga-card bg-[#161b26] p-6 rounded-3xl border border-slate-800 transition hover:border-blue-500" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex flex-col md:flex-row justify-between gap-4">
+                        <div class="flex-1">
+                            <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Exterior • Presencial</span>
+                            <h2 class="text-xl font-bold text-white mt-1">[Remote] CAE Crash Specialist (Python, LS-Dyna, Ansa, Process Automation)</h2>
+                            <p class="text-slate-400 text-sm mb-4">Detroit Engineered Products (Anywhere)</p>
+                            <p class="text-slate-300 text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-emerald-500">Erro técnico na análise.</p>
+                        </div>
+                        <div class="text-center md:text-right min-w-[120px]">
+                            <div class="text-4xl font-black text-emerald-400">0%</div>
+                            <a href="#" target="_blank" class="block mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl">CANDIDATAR</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="vaga-card bg-[#161b26] p-6 rounded-3xl border border-slate-800 transition hover:border-blue-500" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex flex-col md:flex-row justify-between gap-4">
+                        <div class="flex-1">
+                            <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">Exterior • Presencial</span>
+                            <h2 class="text-xl font-bold text-white mt-1">AI Integration Engineer​/AI Automation Specialist; Remote</h2>
+                            <p class="text-slate-400 text-sm mb-4">careerbox.42web (Anywhere)</p>
+                            <p class="text-slate-300 text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-emerald-500">Erro técnico na análise.</p>
+                        </div>
+                        <div class="text-center md:text-right min-w-[120px]">
+                            <div class="text-4xl font-black text-emerald-400">0%</div>
+                            <a href="#" target="_blank" class="block mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl">CANDIDATAR</a>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        <script>
+            let paisF = 'todos';
+            function setPais(p) {
+                paisF = p;
+                document.querySelectorAll('.btn').forEach(b => b.classList.replace('bg-blue-600', 'bg-slate-800'));
+                document.getElementById('p-' + p).classList.replace('bg-slate-800', 'bg-blue-600');
+                apply();
+            }
+            function apply() {
+                const rem = document.getElementById('remCheck').checked;
+                document.querySelectorAll('.vaga-card').forEach(c => {
+                    const mP = paisF === 'todos' || c.dataset.pais === paisF;
+                    const mR = !rem || c.dataset.regime === 'Remoto';
+                    c.style.display = (mP && mR) ? 'block' : 'none';
+                });
+            }
+            window.onload = () => {
+                const g = document.getElementById('grid-vagas');
+                const cards = Array.from(g.children);
+                cards.sort((a,b) => b.dataset.score - a.dataset.score);
+                cards.forEach(c => g.appendChild(c));
+            }
+        </script>
+    </body>
+    </html>
+    
