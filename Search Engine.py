@@ -5,7 +5,6 @@ from serpapi import GoogleSearch
 import google.generativeai as genai
 from jinja2 import Template
 
-# APIs - Certifique-se que estas variáveis estão no Secrets do GitHub
 SERP_API_KEY = os.getenv("SERP_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
@@ -19,36 +18,45 @@ def carregar_perfil():
 
 def analisar_vaga_ia(perfil, titulo, empresa, descricao):
     model = genai.GenerativeModel('gemini-1.5-flash')
-    # Forçamos a IA a ignorar conversas e cuspir apenas JSON puro
     prompt = f"""
     Candidato: Rafael Almeida. Perfil: {perfil[:1500]}
     Vaga: {titulo} na {empresa}. Descrição: {descricao[:1000]}
     
-    Responda APENAS um objeto JSON exatamente assim:
+    Analise a compatibilidade entre o perfil do candidato e a vaga.
+    Liste as competências da vaga e quais o candidato possui.
+    Calcule o percentual: (competências que o candidato possui / total de competências da vaga) * 100.
+    
+    Responda APENAS um objeto JSON exatamente assim (sem texto extra, sem markdown):
     {{
-      "match": (número de 0 a 100),
-      "pais": ("Brasil" ou "Exterior"),
-      "regime": ("Remoto" or "Presencial"),
-      "insight": (máximo 15 palavras sobre o match)
+      "match": <número inteiro de 0 a 100 representando o percentual de compatibilidade>,
+      "regime": "<exatamente 'Remoto' ou 'Presencial'>",
+      "insight": "<máximo 15 palavras sobre o match>"
     }}
     """
     try:
         response = model.generate_content(prompt)
-        # Limpeza para garantir que pegamos apenas o JSON, mesmo que a IA mande lixo
+        # CORREÇÃO 3: regex sem escapes desnecessários
         json_match = re.search(r'\{.*\}', response.text, re.DOTALL)
         if json_match:
             data = json.loads(json_match.group())
-            return data['match'], data['pais'], data['regime'], data['insight']
-        return 50, "Exterior", "Presencial", "Análise inconclusiva."
-    except:
-        return 0, "Exterior", "Presencial", "Erro técnico na análise."
+            match_val = int(data.get('match', 0))
+            regime_val = data.get('regime', 'Presencial')
+            insight_val = data.get('insight', 'Análise inconclusiva.')
+            return match_val, regime_val, insight_val
+        return 50, "Presencial", "Análise inconclusiva."
+    except Exception as e:
+        print(f"Erro IA: {e}")
+        return 0, "Presencial", "Erro técnico na análise."
 
 def executar():
     perfil = carregar_perfil()
+    
+    # CORREÇÃO 1: pais_label definido deterministicamente por query
     queries = [
-        {"q": "Analista de BI Brasil", "loc": "Brazil"},
-        {"q": "Performance Marketing Meta Ads", "loc": "Brazil"},
-        {"q": "Python Automation Specialist Remote", "loc": None}
+        {"q": "Analista de BI", "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "Performance Marketing Meta Ads", "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
+        {"q": "BI Analyst Remote", "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
+        {"q": "Python Automation Specialist Remote", "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
     ]
     
     vagas_list = []
@@ -56,10 +64,16 @@ def executar():
 
     for item in queries:
         try:
-            params = {"engine": "google_jobs", "q": item["q"], "api_key": SERP_API_KEY}
-            if item["loc"]: 
-                params.update({"location": "Brazil", "gl": "br", "hl": "pt-br"})
-            
+            params = {
+                "engine": "google_jobs",
+                "q": item["q"],
+                "api_key": SERP_API_KEY,
+                "gl": item.get("gl", "us"),
+                "hl": item.get("hl", "en"),
+            }
+            if item["loc"]:
+                params["location"] = item["loc"]
+
             search = GoogleSearch(params)
             results = search.get_dict().get("jobs_results", [])
 
@@ -67,21 +81,39 @@ def executar():
                 jid = v.get("job_id")
                 if jid and jid not in vistos:
                     vistos.add(jid)
-                    # Busca o link real de candidatura (resolve o problema de abrir o programa)
-                    link_vaga = v.get("related_links", [{}])[0].get("link", v.get("apply_link", "#"))
-                    
-                    m, p, r, mot = analisar_vaga_ia(perfil, v.get('title'), v.get('company_name'), v.get("description", ""))
-                    
+
+                    # CORREÇÃO 4: usar apply_options para link direto da vaga
+                    apply_options = v.get("apply_options", [])
+                    if apply_options:
+                        link_vaga = apply_options[0].get("link", "#")
+                    else:
+                        # Fallback: related_links filtrado para excluir google.com
+                        related = [
+                            rl.get("link", "") 
+                            for rl in v.get("related_links", [])
+                            if "google.com" not in rl.get("link", "")
+                        ]
+                        link_vaga = related[0] if related else "#"
+
+                    m, r, mot = analisar_vaga_ia(
+                        perfil, v.get('title'), v.get('company_name'), v.get("description", "")
+                    )
+
+                    # CORREÇÃO 2: regime padronizado em português pelo prompt da IA
                     vagas_list.append({
                         "titulo": v.get('title'),
                         "empresa": v.get('company_name'),
                         "link": link_vaga,
                         "local": v.get("location", "N/D"),
-                        "score": m, "pais": p, "regime": r, "analise": mot
+                        "score": m,
+                        "pais": item["pais_label"],  # CORREÇÃO 1: país fixo
+                        "regime": r,
+                        "analise": mot
                     })
-        except: continue
+        except Exception as e:
+            print(f"Erro query: {e}")
+            continue
 
-    # HTML com filtros funcionando via JS (resolve o problema de filtros vazios)
     html_template = """
     <!DOCTYPE html>
     <html lang="pt-br">
@@ -107,51 +139,69 @@ def executar():
 
             <div id="grid-vagas" class="space-y-4">
                 {% for v in vagas %}
-                <div class="vaga-card bg-[#161b26] p-6 rounded-3xl border border-slate-800 transition hover:border-blue-500" 
-                     data-pais="{{v.pais}}" data-regime="{{v.regime}}" data-score="{{v.score}}">
+                <div class="vaga-card bg-[#161b26] p-6 rounded-3xl border border-slate-800 transition hover:border-blue-500"
+                     data-pais="{{ v.pais }}" data-regime="{{ v.regime }}" data-score="{{ v.score }}">
                     <div class="flex flex-col md:flex-row justify-between gap-4">
                         <div class="flex-1">
-                            <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">{{v.pais}} • {{v.regime}}</span>
-                            <h2 class="text-xl font-bold text-white mt-1">{{v.titulo}}</h2>
-                            <p class="text-slate-400 text-sm mb-4">{{v.empresa}} ({{v.local}})</p>
-                            <p class="text-slate-300 text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-emerald-500">{{v.analise}}</p>
+                            <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">{{ v.pais }} • {{ v.regime }}</span>
+                            <h2 class="text-xl font-bold text-white mt-1">{{ v.titulo }}</h2>
+                            <p class="text-slate-400 text-sm mb-4">{{ v.empresa }} ({{ v.local }})</p>
+                            <p class="text-slate-300 text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-emerald-500">{{ v.analise }}</p>
                         </div>
                         <div class="text-center md:text-right min-w-[120px]">
-                            <div class="text-4xl font-black text-emerald-400">{{v.score}}%</div>
-                            <a href="{{v.link}}" target="_blank" class="block mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl">CANDIDATAR</a>
+                            <div class="text-4xl font-black text-emerald-400">{{ v.score }}%</div>
+                            <!-- CORREÇÃO 4: target="_blank" + rel para segurança -->
+                            <a href="{{ v.link }}" target="_blank" rel="noopener noreferrer"
+                               class="block mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl">
+                               CANDIDATAR
+                            </a>
                         </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
         </div>
+
         <script>
             let paisF = 'todos';
+
             function setPais(p) {
                 paisF = p;
-                document.querySelectorAll('.btn').forEach(b => b.classList.replace('bg-blue-600', 'bg-slate-800'));
-                document.getElementById('p-' + p).classList.replace('bg-slate-800', 'bg-blue-600');
+                // Reset todos os botões
+                document.querySelectorAll('.btn').forEach(b => {
+                    b.classList.remove('bg-blue-600');
+                    b.classList.add('bg-slate-800');
+                });
+                // Ativa o botão clicado
+                const btn = document.getElementById('p-' + p);
+                if (btn) {
+                    btn.classList.remove('bg-slate-800');
+                    btn.classList.add('bg-blue-600');
+                }
                 apply();
             }
+
             function apply() {
                 const rem = document.getElementById('remCheck').checked;
                 document.querySelectorAll('.vaga-card').forEach(c => {
+                    // CORREÇÃO 2: comparação com 'Remoto' (português, igual ao que a IA retorna)
                     const mP = paisF === 'todos' || c.dataset.pais === paisF;
                     const mR = !rem || c.dataset.regime === 'Remoto';
                     c.style.display = (mP && mR) ? 'block' : 'none';
                 });
             }
+
             window.onload = () => {
                 const g = document.getElementById('grid-vagas');
                 const cards = Array.from(g.children);
-                cards.sort((a,b) => b.dataset.score - a.dataset.score);
+                cards.sort((a, b) => Number(b.dataset.score) - Number(a.dataset.score));
                 cards.forEach(c => g.appendChild(c));
+                apply(); // Aplica o filtro padrão ao carregar
             }
         </script>
     </body>
     </html>
     """
-    # CRÍTICO: Deve-se chamar index.html para o GitHub Pages carregar o link direto
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(Template(html_template).render(vagas=vagas_list))
 
