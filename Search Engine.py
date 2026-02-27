@@ -5,7 +5,7 @@ from serpapi import GoogleSearch
 import google.generativeai as genai
 from jinja2 import Template
 
-# Configurações
+# APIs
 SERP_API_KEY = os.getenv("SERP_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
@@ -14,131 +14,135 @@ def carregar_perfil():
     try:
         with open("Perfil.txt", "r", encoding="utf-8") as f:
             return f.read()
-    except: return "Perfil não encontrado."
+    except: return "Perfil de Rafael Almeida: Especialista em BI, Python, Meta Ads e SQL."
 
 def analisar_vaga_ia(perfil, titulo, empresa, descricao):
     model = genai.GenerativeModel('gemini-1.5-flash')
-    # Forçamos a IA a ignorar conversas e cuspir apenas JSON
     prompt = f"""
     Candidato: Rafael Almeida. Perfil: {perfil[:1500]}
     Vaga: {titulo} na {empresa}. Descrição: {descricao[:1000]}
     
-    Responda APENAS um objeto JSON estrito com estas chaves:
-    "match": (inteiro de 0 a 100),
-    "localizacao": ("Brasil" ou "Exterior"),
-    "modalidade": ("Remoto" ou "Presencial"),
-    "insight": (texto de 10 palavras sobre o match)
+    Responda APENAS um JSON:
+    {{
+      "match": (0 a 100),
+      "localizacao": ("Brasil" ou "Exterior"),
+      "modalidade": ("Remoto" ou "Presencial"),
+      "insight": (texto curto)
+    }}
     """
     try:
         response = model.generate_content(prompt)
-        # Limpeza de markdown caso a IA coloque
-        json_clean = re.search(r'\{.*\}', response.text, re.DOTALL).group()
-        data = json.loads(json_clean)
+        # Extrai apenas o que está entre chaves {}
+        json_str = re.search(r'\{.*\}', response.text, re.DOTALL).group()
+        data = json.loads(json_str)
         return data['match'], data['localizacao'], data['modalidade'], data['insight']
     except:
-        return 0, "Exterior", "Presencial", "Erro na análise de dados."
+        return 50, "Exterior", "Presencial", "Análise genérica - Erro de processamento."
 
-def gerar_painel():
+def executar():
     perfil = carregar_perfil()
+    # Aumentamos a precisão das buscas no Brasil
     queries = [
-        {"q": "Analista de BI Brasil", "loc": "Brazil"},
-        {"q": "Performance Marketing Remote", "loc": None}
+        {"q": "Analista de BI", "loc": "Brazil"},
+        {"q": "Especialista Meta Ads", "loc": "Brazil"},
+        {"q": "Python Automation Remote", "loc": None}
     ]
     
-    vagas_processadas = []
+    vagas_final = []
     vistos = set()
 
     for item in queries:
         try:
             params = {"engine": "google_jobs", "q": item["q"], "api_key": SERP_API_KEY}
-            if item["loc"]: params.update({"location": "Brazil", "gl": "br"})
+            if item["loc"]: params.update({"location": "Brazil", "gl": "br", "hl": "pt-br"})
             
             search = GoogleSearch(params)
             results = search.get_dict().get("jobs_results", [])
 
             for v in results:
-                if v.get("job_id") not in vistos:
-                    vistos.add(v.get("job_id"))
-                    m, l, mod, ins = analisar_vaga_ia(perfil, v.get('title'), v.get('company_name'), v.get("description", ""))
+                jid = v.get("job_id")
+                if jid and jid not in vistos:
+                    vistos.add(jid)
+                    # Pegamos o link real da vaga aqui
+                    link_real = v.get("related_links", [{}])[0].get("link", v.get("apply_link", "#"))
                     
-                    vagas_processadas.append({
+                    m, p, r, ins = analisar_vaga_ia(perfil, v.get('title'), v.get('company_name'), v.get("description", ""))
+                    
+                    vagas_final.append({
                         "titulo": v.get('title'),
                         "empresa": v.get('company_name'),
-                        "link": v.get("related_links", [{}])[0].get("link", "#"),
-                        "cidade": v.get("location", "N/D"),
-                        "match": m, "pais": l, "regime": mod, "motivo": ins
+                        "link": link_real,
+                        "cidade": v.get("location", "Não informado"),
+                        "match": m, "pais": p, "regime": r, "motivo": ins
                     })
         except: continue
 
-    # HTML com Hierarquia de Filtros Corrigida
     html_template = """
     <!DOCTYPE html>
     <html lang="pt-br">
     <head>
         <meta charset="UTF-8">
-        <title>Job Intelligence AI</title>
+        <title>IA Jobs Finder | Rafael Almeida</title>
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
-    <body class="bg-[#0a0c14] text-white p-8">
+    <body class="bg-[#0b0e14] text-slate-200 p-4 md:p-10 font-sans">
         <div class="max-w-4xl mx-auto">
-            <header class="text-center mb-10">
-                <h1 class="text-3xl font-bold text-cyan-400">Job Intelligence</h1>
-                <p class="text-gray-500 text-sm">Filtros Inteligentes para Rafael Almeida</p>
+            <header class="text-center mb-12">
+                <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">JOBS FINDER IA</h1>
+                <p class="text-slate-500 mt-2">Filtros Inteligentes para Rafael Almeida</p>
                 
-                <div class="mt-8 flex flex-col gap-4 items-center">
-                    <div class="flex gap-2">
-                        <button onclick="setPais('todos')" id="b-todos" class="p-btn bg-gray-800 px-5 py-2 rounded-lg font-bold">Todos</button>
-                        <button onclick="setPais('Brasil')" id="b-Brasil" class="p-btn bg-gray-800 px-5 py-2 rounded-lg font-bold">🇧🇷 Brasil</button>
-                        <button onclick="setPais('Exterior')" id="b-Exterior" class="p-btn bg-gray-800 px-5 py-2 rounded-lg font-bold">🌍 Exterior</button>
-                    </div>
-                    <div class="flex gap-4 text-xs">
-                        <label class="flex items-center gap-2 text-purple-400">
-                            <input type="checkbox" id="remotoOnly" onchange="aplicar()"> SOMENTE REMOTO
-                        </label>
+                <div class="mt-8 flex flex-wrap justify-center gap-3">
+                    <button onclick="setPais('todos')" id="p-todos" class="btn-p bg-slate-800 px-6 py-2 rounded-xl font-bold border border-slate-700">Todos</button>
+                    <button onclick="setPais('Brasil')" id="p-Brasil" class="btn-p bg-slate-800 px-6 py-2 rounded-xl font-bold border border-slate-700">🇧🇷 Brasil</button>
+                    <button onclick="setPais('Exterior')" id="p-Exterior" class="btn-p bg-slate-800 px-6 py-2 rounded-xl font-bold border border-slate-700">🌍 Exterior</button>
+                    <div class="flex items-center gap-2 ml-4 bg-slate-900 px-4 py-2 rounded-xl border border-slate-800">
+                        <input type="checkbox" id="remotoCheck" onchange="aplicar()" class="w-4 h-4">
+                        <label for="remotoCheck" class="text-sm font-bold text-purple-400">APENAS REMOTO</label>
                     </div>
                 </div>
             </header>
 
-            <div id="grid" class="space-y-4">
+            <div id="grid-vagas" class="space-y-4">
                 {% for v in vagas %}
-                <div class="job-card bg-[#151926] p-6 rounded-2xl border border-gray-800" 
+                <div class="vaga-card bg-[#161b26] p-6 rounded-3xl border border-slate-800 transition hover:border-blue-500" 
                      data-pais="{{v.pais}}" data-regime="{{v.regime}}" data-score="{{v.match}}">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <span class="text-[10px] font-bold text-cyan-500 uppercase">{{v.pais}} | {{v.regime}}</span>
-                            <h2 class="text-xl font-bold">{{v.titulo}}</h2>
-                            <p class="text-gray-400 text-sm">{{v.empresa}} — {{v.cidade}}</p>
+                    <div class="flex flex-col md:row justify-between gap-4">
+                        <div class="flex-1">
+                            <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">{{v.pais}} • {{v.regime}}</span>
+                            <h2 class="text-xl font-bold text-white mt-1">{{v.titulo}}</h2>
+                            <p class="text-slate-400 text-sm mb-4">{{v.empresa}} ({{v.cidade}})</p>
+                            <p class="text-slate-300 text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-emerald-500">{{v.motivo}}</p>
                         </div>
-                        <div class="text-right">
-                            <div class="text-2xl font-black text-emerald-400">{{v.match}}%</div>
-                            <a href="{{v.link}}" target="_blank" class="mt-3 inline-block bg-blue-600 hover:bg-blue-500 px-4 py-1 rounded text-xs font-bold">CANDIDATAR</a>
+                        <div class="text-center md:text-right min-w-[120px]">
+                            <div class="text-4xl font-black text-emerald-400">{{v.match}}%</div>
+                            <div class="text-[10px] text-slate-500 uppercase mb-4">Match</div>
+                            <a href="{{v.link}}" target="_blank" class="block bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-900/20">CANDIDATAR</a>
                         </div>
                     </div>
-                    <p class="mt-4 text-xs text-gray-400 italic">{{v.motivo}}</p>
                 </div>
                 {% endfor %}
             </div>
         </div>
 
         <script>
-            let filtroPais = 'todos';
+            let paisAtual = 'todos';
             function setPais(p) {
-                filtroPais = p;
-                document.querySelectorAll('.p-btn').forEach(b => b.classList.remove('bg-blue-600'));
-                document.getElementById('b-' + p).classList.add('bg-blue-600');
+                paisAtual = p;
+                document.querySelectorAll('.btn-p').forEach(b => b.classList.replace('bg-blue-600', 'bg-slate-800'));
+                document.getElementById('p-' + p).classList.replace('bg-slate-800', 'bg-blue-600');
                 aplicar();
             }
             function aplicar() {
-                const remoto = document.getElementById('remotoOnly').checked;
-                document.querySelectorAll('.job-card').forEach(c => {
-                    const mPais = filtroPais === 'todos' || c.dataset.pais === filtroPais;
-                    const mRegime = !remoto || c.dataset.regime === 'Remoto';
-                    c.style.display = (mPais && mRegime) ? 'block' : 'none';
+                const isRemoto = document.getElementById('remotoCheck').checked;
+                document.querySelectorAll('.vaga-card').forEach(card => {
+                    const matchPais = paisAtual === 'todos' || card.dataset.pais === paisAtual;
+                    const matchRegime = !isRemoto || card.dataset.regime === 'Remoto';
+                    card.style.display = (matchPais && matchRegime) ? 'block' : 'none';
                 });
             }
             window.onload = () => {
                 setPais('todos');
-                const g = document.getElementById('grid');
+                const g = document.getElementById('grid-vagas');
                 const cards = Array.from(g.children);
                 cards.sort((a,b) => b.dataset.score - a.dataset.score);
                 cards.forEach(c => g.appendChild(c));
@@ -147,9 +151,8 @@ def gerar_painel():
     </body>
     </html>
     """
-    # Importante: salvar como index.html para o GitHub Pages funcionar
     with open("index.html", "w", encoding="utf-8") as f:
-        f.write(Template(html_template).render(vagas=vagas_processadas))
+        f.write(Template(html_template).render(vagas=vagas_final))
 
 if __name__ == "__main__":
-    gerar_painel()
+    executar()
