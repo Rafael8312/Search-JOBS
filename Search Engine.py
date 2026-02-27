@@ -16,49 +16,67 @@ def carregar_perfil():
     except:
         return "Rafael Almeida: Especialista em BI, Python, SQL e Performance Marketing."
 
-def analisar_vaga_ia(perfil, titulo, empresa, descricao):
+# CORREÇÃO 1: Detecção determinística de regime (não depende da IA)
+def detectar_regime(titulo, descricao, localizacao):
+    texto = f"{titulo} {descricao} {localizacao}".lower()
+    palavras_remoto = ["remote", "remoto", "home office", "trabalho remoto", "100% remoto", "anywhere", "híbrido", "hybrid"]
+    if any(p in texto for p in palavras_remoto):
+        return "Remoto"
+    return "Presencial"
+
+def analisar_vaga_ia(perfil, titulo, empresa, descricao, localizacao):
     model = genai.GenerativeModel('gemini-1.5-flash')
     prompt = f"""
-    Candidato: Rafael Almeida. Perfil: {perfil[:1500]}
-    Vaga: {titulo} na {empresa}. Descrição: {descricao[:1000]}
-    
-    Analise a compatibilidade entre o perfil do candidato e a vaga.
-    Liste as competências da vaga e quais o candidato possui.
-    Calcule o percentual: (competências que o candidato possui / total de competências da vaga) * 100.
-    
-    Responda APENAS um objeto JSON exatamente assim (sem texto extra, sem markdown):
-    {{
-      "match": <número inteiro de 0 a 100 representando o percentual de compatibilidade>,
-      "regime": "<exatamente 'Remoto' ou 'Presencial'>",
-      "insight": "<máximo 15 palavras sobre o match>"
-    }}
-    """
+Você é um recrutador especialista. Analise a compatibilidade entre o candidato e a vaga abaixo.
+
+PERFIL DO CANDIDATO:
+{perfil[:1500]}
+
+VAGA:
+Título: {titulo}
+Empresa: {empresa}
+Localização: {localizacao}
+Descrição: {descricao[:1000]}
+
+INSTRUÇÕES:
+1. Liste todas as competências exigidas pela vaga.
+2. Identifique quais dessas competências o candidato possui com base no perfil.
+3. Calcule: match = (competências que o candidato possui / total de competências da vaga) * 100
+4. Estime o salário mensal em Reais Brasileiros (R$) para esta vaga, considerando cargo, empresa, localidade e nível. Use faixas de mercado brasileiro de 2025/2026.
+5. Escreva um insight de no máximo 15 palavras sobre o match.
+
+Responda APENAS um JSON puro, sem markdown, sem explicações, exatamente neste formato:
+{{"match": <inteiro 0-100>, "salario": "<faixa ex: R$ 8.000 - R$ 12.000>", "insight": "<máximo 15 palavras>"}}
+"""
     try:
         response = model.generate_content(prompt)
-        # CORREÇÃO 3: regex sem escapes desnecessários
-        json_match = re.search(r'\{.*\}', response.text, re.DOTALL)
+        # CORREÇÃO 2A: Remove blocos markdown antes de fazer regex
+        texto_limpo = re.sub(r'```(?:json)?', '', response.text).strip()
+        # CORREÇÃO 2B: Regex correto (sem escape duplo)
+        json_match = re.search(r'\{.*?\}', texto_limpo, re.DOTALL)
         if json_match:
             data = json.loads(json_match.group())
             match_val = int(data.get('match', 0))
-            regime_val = data.get('regime', 'Presencial')
+            salario_val = data.get('salario', 'Não estimado')
             insight_val = data.get('insight', 'Análise inconclusiva.')
-            return match_val, regime_val, insight_val
-        return 50, "Presencial", "Análise inconclusiva."
+            return match_val, salario_val, insight_val
+        print(f"[AVISO] JSON não encontrado na resposta da IA: {response.text[:200]}")
+        return 50, "Não estimado", "Análise inconclusiva."
     except Exception as e:
-        print(f"Erro IA: {e}")
-        return 0, "Presencial", "Erro técnico na análise."
+        # CORREÇÃO 2C: Expõe o erro real para debug no GitHub Actions
+        print(f"[ERRO IA] {e}")
+        return 0, "Não estimado", "Erro técnico na análise."
 
 def executar():
     perfil = carregar_perfil()
-    
-    # CORREÇÃO 1: pais_label definido deterministicamente por query
+
     queries = [
         {"q": "Analista de BI", "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
         {"q": "Performance Marketing Meta Ads", "loc": "Brazil", "gl": "br", "hl": "pt-br", "pais_label": "Brasil"},
         {"q": "BI Analyst Remote", "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
         {"q": "Python Automation Specialist Remote", "loc": None, "gl": "us", "hl": "en", "pais_label": "Exterior"},
     ]
-    
+
     vagas_list = []
     vistos = set()
 
@@ -82,36 +100,41 @@ def executar():
                 if jid and jid not in vistos:
                     vistos.add(jid)
 
-                    # CORREÇÃO 4: usar apply_options para link direto da vaga
+                    titulo = v.get('title', '')
+                    empresa = v.get('company_name', '')
+                    localizacao = v.get("location", "N/D")
+                    descricao = v.get("description", "")
+
+                    # CORREÇÃO 1: Regime detectado por código, não pela IA
+                    regime = detectar_regime(titulo, descricao, localizacao)
+
+                    # CORREÇÃO 4: Link direto via apply_options
                     apply_options = v.get("apply_options", [])
                     if apply_options:
                         link_vaga = apply_options[0].get("link", "#")
                     else:
-                        # Fallback: related_links filtrado para excluir google.com
                         related = [
-                            rl.get("link", "") 
+                            rl.get("link", "")
                             for rl in v.get("related_links", [])
                             if "google.com" not in rl.get("link", "")
                         ]
                         link_vaga = related[0] if related else "#"
 
-                    m, r, mot = analisar_vaga_ia(
-                        perfil, v.get('title'), v.get('company_name'), v.get("description", "")
-                    )
+                    m, salario, mot = analisar_vaga_ia(perfil, titulo, empresa, descricao, localizacao)
 
-                    # CORREÇÃO 2: regime padronizado em português pelo prompt da IA
                     vagas_list.append({
-                        "titulo": v.get('title'),
-                        "empresa": v.get('company_name'),
+                        "titulo": titulo,
+                        "empresa": empresa,
                         "link": link_vaga,
-                        "local": v.get("location", "N/D"),
+                        "local": localizacao,
                         "score": m,
-                        "pais": item["pais_label"],  # CORREÇÃO 1: país fixo
-                        "regime": r,
+                        "salario": salario,
+                        "pais": item["pais_label"],
+                        "regime": regime,
                         "analise": mot
                     })
         except Exception as e:
-            print(f"Erro query: {e}")
+            print(f"[ERRO QUERY] {e}")
             continue
 
     html_template = """
@@ -143,14 +166,20 @@ def executar():
                      data-pais="{{ v.pais }}" data-regime="{{ v.regime }}" data-score="{{ v.score }}">
                     <div class="flex flex-col md:flex-row justify-between gap-4">
                         <div class="flex-1">
-                            <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">{{ v.pais }} • {{ v.regime }}</span>
+                            <div class="flex flex-wrap gap-2 items-center mb-1">
+                                <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">{{ v.pais }} • {{ v.regime }}</span>
+                                {% if v.regime == 'Remoto' %}
+                                <span class="text-[10px] font-black bg-purple-900 text-purple-300 px-2 py-0.5 rounded-full uppercase">🏠 Remoto</span>
+                                {% endif %}
+                            </div>
                             <h2 class="text-xl font-bold text-white mt-1">{{ v.titulo }}</h2>
-                            <p class="text-slate-400 text-sm mb-4">{{ v.empresa }} ({{ v.local }})</p>
+                            <p class="text-slate-400 text-sm mb-1">{{ v.empresa }} ({{ v.local }})</p>
+                            <p class="text-yellow-400 text-sm font-bold mb-4">💰 {{ v.salario }}</p>
                             <p class="text-slate-300 text-xs italic bg-black/30 p-4 rounded-2xl border-l-4 border-emerald-500">{{ v.analise }}</p>
                         </div>
                         <div class="text-center md:text-right min-w-[120px]">
                             <div class="text-4xl font-black text-emerald-400">{{ v.score }}%</div>
-                            <!-- CORREÇÃO 4: target="_blank" + rel para segurança -->
+                            <div class="text-[10px] text-slate-500 mt-1 uppercase">compatibilidade</div>
                             <a href="{{ v.link }}" target="_blank" rel="noopener noreferrer"
                                class="block mt-4 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl">
                                CANDIDATAR
@@ -167,12 +196,10 @@ def executar():
 
             function setPais(p) {
                 paisF = p;
-                // Reset todos os botões
                 document.querySelectorAll('.btn').forEach(b => {
                     b.classList.remove('bg-blue-600');
                     b.classList.add('bg-slate-800');
                 });
-                // Ativa o botão clicado
                 const btn = document.getElementById('p-' + p);
                 if (btn) {
                     btn.classList.remove('bg-slate-800');
@@ -184,7 +211,6 @@ def executar():
             function apply() {
                 const rem = document.getElementById('remCheck').checked;
                 document.querySelectorAll('.vaga-card').forEach(c => {
-                    // CORREÇÃO 2: comparação com 'Remoto' (português, igual ao que a IA retorna)
                     const mP = paisF === 'todos' || c.dataset.pais === paisF;
                     const mR = !rem || c.dataset.regime === 'Remoto';
                     c.style.display = (mP && mR) ? 'block' : 'none';
@@ -196,7 +222,7 @@ def executar():
                 const cards = Array.from(g.children);
                 cards.sort((a, b) => Number(b.dataset.score) - Number(a.dataset.score));
                 cards.forEach(c => g.appendChild(c));
-                apply(); // Aplica o filtro padrão ao carregar
+                apply();
             }
         </script>
     </body>
