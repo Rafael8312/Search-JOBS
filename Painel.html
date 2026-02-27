@@ -3,690 +3,578 @@
     <html lang="pt-br">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Job Intelligence AI</title>
+        <title>Job Matcher v2</title>
         <script src="https://cdn.tailwindcss.com"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet">
         <style>
-            body { font-family: 'Plus Jakarta Sans', sans-serif; background: #0b0f1a; color: #e2e8f0; }
-            .vaga-card { background: rgba(23, 30, 48, 0.6); border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
-            .vaga-card:hover { border-color: #3b82f6; transform: translateY(-3px); background: rgba(23, 30, 48, 0.9); }
-            .badge-match { background: linear-gradient(135deg, #3b82f6, #2dd4bf); }
+            body { background: #0a0e17; color: #f1f5f9; }
+            .vaga-card { background: #151b28; border: 1px solid #1e293b; transition: 0.2s; }
+            .vaga-card:hover { border-color: #3b82f6; }
+            .active-btn { background-color: #3b82f6 !important; color: white !important; }
         </style>
     </head>
-    <body class="p-6">
+    <body class="p-8">
         <div class="max-w-5xl mx-auto">
-            <header class="text-center mb-12">
-                <h1 class="text-5xl font-extrabold mb-4 bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">Job Intelligence</h1>
-                <p class="text-slate-400 uppercase tracking-widest text-xs font-bold">Análise em tempo real para Rafael Almeida</p>
+            <header class="mb-10 text-center">
+                <h1 class="text-4xl font-black mb-2 text-blue-500">Job Intelligence</h1>
+                <p class="text-slate-500 text-sm">Organizado por Match de Competências</p>
                 
-                <div class="mt-8 flex flex-wrap justify-center gap-3">
-                    <button onclick="filtrar('todos', 'todos')" class="bg-slate-800 px-6 py-2 rounded-full font-bold hover:bg-slate-700">Todos</button>
-                    <button onclick="filtrar('Brasil', 'todos')" class="bg-emerald-600/20 text-emerald-400 border border-emerald-600/30 px-6 py-2 rounded-full font-bold hover:bg-emerald-600/40">🇧🇷 Brasil</button>
-                    <button onclick="filtrar('Exterior', 'todos')" class="bg-blue-600/20 text-blue-400 border border-blue-600/30 px-6 py-2 rounded-full font-bold hover:bg-blue-600/40">🌍 Exterior</button>
-                    <button onclick="filtrar('todos', 'Remoto')" class="bg-purple-600/20 text-purple-400 border border-purple-600/30 px-6 py-2 rounded-full font-bold hover:bg-purple-600/40">🏠 Somente Remoto</button>
+                <div class="mt-8 flex flex-wrap justify-center gap-4 border-b border-slate-800 pb-6">
+                    <button onclick="setMainFilter('todos')" id="btn-todos" class="filter-main bg-slate-800 px-6 py-2 rounded-lg font-bold active-btn">Todos</button>
+                    <button onclick="setMainFilter('Brasil')" id="btn-Brasil" class="filter-main bg-slate-800 px-6 py-2 rounded-lg font-bold">🇧🇷 Brasil</button>
+                    <button onclick="setMainFilter('Exterior')" id="btn-Exterior" class="filter-main bg-slate-800 px-6 py-2 rounded-lg font-bold">🌍 Exterior</button>
+                </div>
+
+                <div class="mt-4 flex justify-center gap-4 text-xs">
+                    <span class="text-slate-500 uppercase font-bold self-center">Regime:</span>
+                    <button onclick="setSubFilter('todos')" id="sub-todos" class="filter-sub bg-slate-900 border border-slate-700 px-3 py-1 rounded active-btn">Qualquer</button>
+                    <button onclick="setSubFilter('Remoto')" id="sub-Remoto" class="filter-sub bg-slate-900 border border-slate-700 px-3 py-1 rounded uppercase">Remoto</button>
+                    <button onclick="setSubFilter('Presencial')" id="sub-Presencial" class="filter-sub bg-slate-900 border border-slate-700 px-3 py-1 rounded uppercase">Presencial/Híbrido</button>
                 </div>
             </header>
 
-            <div id="lista" class="grid gap-6">
+            <div id="lista" class="space-y-4">
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Analista BI Sênior (Power BI e Microsoft Fabric)</h2>
-                            <p class="text-slate-400 text-sm mb-4">Leega Consultoria — Qualquer lugar</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Analista de BI e MIS Pleno</h2>
+                        <p class="text-slate-400 text-sm mb-4">TP — São José dos Pinhais, PR</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Analista de BI Jr</h2>
-                            <p class="text-slate-400 text-sm mb-4">Carbigdata — Qualquer lugar</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Analista de BI e MIS Pleno</h2>
+                        <p class="text-slate-400 text-sm mb-4">TP — Itajaí - Volta de Cima, Itajaí - SC (+1)</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">FÁCIL ASSIST | ANALISTA BI SR</h2>
-                            <p class="text-slate-400 text-sm mb-4">Fácil Assist — Qualquer lugar</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Analista de BI e MIS Pleno</h2>
+                        <p class="text-slate-400 text-sm mb-4">TP — Feira de Santana - Maria Quitéria, Feira de Santana - BA</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Analista de BI - SR | SAP BO e Qlik Sense</h2>
-                            <p class="text-slate-400 text-sm mb-4">Objective — Qualquer lugar</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Analista de B.i</h2>
+                        <p class="text-slate-400 text-sm mb-4">Leveros — Assis, SP</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Analista de BI/Dados – Sede/Canarana - MT - Sicredi Araxingu</h2>
-                            <p class="text-slate-400 text-sm mb-4">Sicredi — Canarana, MT</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Analista de BI e MIS Pleno</h2>
+                        <p class="text-slate-400 text-sm mb-4">TP — Cabedelo - Jacaré, Cabedelo - PB</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Analista de BI e MIS Pleno</h2>
-                            <p class="text-slate-400 text-sm mb-4">TP — N/D</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Analista de Projeto e Processos (Dados & BI)</h2>
+                        <p class="text-slate-400 text-sm mb-4">VERY TECNOLOGIA S.A. — Teresina, PI</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Analista de Power BI</h2>
-                            <p class="text-slate-400 text-sm mb-4">AllEasy — Brasil</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Analista de BI - SR | SAP BO e Qlik Sense</h2>
+                        <p class="text-slate-400 text-sm mb-4">Objective — Qualquer lugar</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Analista De Dados Sr Comercial - Presencial</h2>
-                            <p class="text-slate-400 text-sm mb-4">Vigor — Primavera do Leste, MT</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Analista de BI Sr.</h2>
+                        <p class="text-slate-400 text-sm mb-4">EXAME — São Paulo, SP</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Analista de BI Pleno - POWER BI</h2>
-                            <p class="text-slate-400 text-sm mb-4">Montreal | Tecnologia e Inovação — Qualquer lugar</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Analista de BI / Dados (Pleno ou Sênior)</h2>
+                        <p class="text-slate-400 text-sm mb-4">HOOBOX Robotics — São Paulo, SP</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Analista de BI (Data Viz & Data Insights)</h2>
-                            <p class="text-slate-400 text-sm mb-4">Engineering Brasil — Primavera do Leste, MT (+1)</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Analista de BI</h2>
+                        <p class="text-slate-400 text-sm mb-4">BESTBUYHOTEL VIAGENS E TURISMO LTDA. — Jundiaí - Aglomeração Urbana de Jundiaí, Jundiaí - SP</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">[Marketing e Performance] Analista de Marketing e Performance Pleno (São Paulo)</h2>
-                            <p class="text-slate-400 text-sm mb-4">Contabilizei — Qualquer lugar</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Performance Marketing Manager- Entain</h2>
+                        <p class="text-slate-400 text-sm mb-4">365Scores — São Paulo, SP (+1)</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Performance Marketing Lead Ruby Labs</h2>
-                            <p class="text-slate-400 text-sm mb-4">Ruby Labs — N/D</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Performance Marketing Lead Ruby Labs</h2>
+                        <p class="text-slate-400 text-sm mb-4">Ruby Labs — Amazonas</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Performance Marketer</h2>
-                            <p class="text-slate-400 text-sm mb-4">Jobgether — Brasil</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Performance Marketing Manager (E-Commerce)</h2>
+                        <p class="text-slate-400 text-sm mb-4">Purolabs — Rio de Janeiro, RJ</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Estágio Em Marketing (Audiovisual Ou Performance/Growth)</h2>
-                            <p class="text-slate-400 text-sm mb-4">Impacto Tecnologia — Brasil</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Diretor (a) De Mídia - Performance c/ inglês fluente</h2>
+                        <p class="text-slate-400 text-sm mb-4">Publicis Groupe — São Paulo, SP</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Analista de Mídia Paga & Performance</h2>
-                            <p class="text-slate-400 text-sm mb-4">Agência Canna — Qualquer lugar</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Performance Marketing Analyst</h2>
+                        <p class="text-slate-400 text-sm mb-4">Lago — Rondônia</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Head of Growth / Performance Marketing</h2>
-                            <p class="text-slate-400 text-sm mb-4">Activate Talent — Qualquer lugar</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Analista de Digital Marketing e Performance Sr</h2>
+                        <p class="text-slate-400 text-sm mb-4">Krispy Kreme Brasil — São Paulo, SP</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Head of Marketing & Growth</h2>
-                            <p class="text-slate-400 text-sm mb-4">Workana — Qualquer lugar</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Performance Marketing Analyst</h2>
+                        <p class="text-slate-400 text-sm mb-4">Varsity Tutors — Palhoça, SC</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Analista de Performance | Mídia Paga</h2>
-                            <p class="text-slate-400 text-sm mb-4">+A Educação — Qualquer lugar</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Coordenador de Tráfego Pago | Performance | Mídia Paga | Remoto</h2>
+                        <p class="text-slate-400 text-sm mb-4">ALLMA MARKETING LTDA — Barueri, SP</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Analista de Performance de Fidelização de Marketing Sênior na Aviva carreiras – Remoto</h2>
-                            <p class="text-slate-400 text-sm mb-4">Aviva carreiras — Brasil</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Performance Marketing Designer Pleno</h2>
+                        <p class="text-slate-400 text-sm mb-4">EBAC Online — Qualquer lugar</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Performance Marketing Strategist for a Digital Marketing Agency</h2>
-                            <p class="text-slate-400 text-sm mb-4">confidential — Brasil</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Paid & Performance Marketing Lead</h2>
+                        <p class="text-slate-400 text-sm mb-4">Jobgether — Brasil</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Python Automation Engineer</h2>
-                            <p class="text-slate-400 text-sm mb-4">Global Connect Technologies — Sunrise, FL</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Vibe Coding Specialist Python Automation</h2>
+                        <p class="text-slate-400 text-sm mb-4">OpenTrain AI — Anywhere</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Firmware Tester - Python (Pytest)</h2>
-                            <p class="text-slate-400 text-sm mb-4">Global Connect Technologies — Sunrise, FL</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Tech VA: n8n + Python Expert for Data Scraping and Automation</h2>
+                        <p class="text-slate-400 text-sm mb-4">Upwork — Anywhere</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Python Automation Engineer</h2>
-                            <p class="text-slate-400 text-sm mb-4">Global Connect Technologies — Fort Lauderdale, FL</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">[Remote] CAE Crash Specialist (Python, LS-Dyna, Ansa, Process Automation)</h2>
+                        <p class="text-slate-400 text-sm mb-4">Detroit Engineered Products — Anywhere</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Python Testing and Automation</h2>
-                            <p class="text-slate-400 text-sm mb-4">JPMorgan Chase & Co. — Tampa, FL</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">AI Integration Engineer​/AI Automation Specialist; Remote</h2>
+                        <p class="text-slate-400 text-sm mb-4">careerbox.42web — Anywhere</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Firmware Tester - Python</h2>
-                            <p class="text-slate-400 text-sm mb-4">Global Connect Technologies — Fort Lauderdale, FL</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Sr Business Intelligence Analyst</h2>
+                        <p class="text-slate-400 text-sm mb-4">Americold — Atlanta, GA</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Python Developer Automation, SQL</h2>
-                            <p class="text-slate-400 text-sm mb-4">Saransh — Tampa, FL</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Senior/Principal Business Intelligence Analyst (Global Customer Support) at Workday, Inc. Atlanta, GA</h2>
+                        <p class="text-slate-400 text-sm mb-4">Workday, Inc. — Atlanta, GA</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Business Intelligence / Growth Lead</h2>
-                            <p class="text-slate-400 text-sm mb-4">Rahal — بغداد</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Business Intelligence Analyst</h2>
+                        <p class="text-slate-400 text-sm mb-4">Regions — Hoover, AL</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Epic BI Developer Sr- Cogito, Caboodle, Clarity</h2>
-                            <p class="text-slate-400 text-sm mb-4">Aurora Health Care — العراق (+125 مكان آخر)</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Business Intelligence Analyst</h2>
+                        <p class="text-slate-400 text-sm mb-4">Insight Global — Atlanta, GA</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Senior Strategy & Planning Analyst | Ireland | Remote</h2>
-                            <p class="text-slate-400 text-sm mb-4">Grafana Labs — العراق (+124 مكان آخر)</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
-                        </div>
+                        <h2 class="text-xl font-bold mb-1">Sr. BI Analyst</h2>
+                        <p class="text-slate-400 text-sm mb-4">Aptean — Atlanta, GA</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
-                <div class="vaga-card p-6 rounded-3xl" data-pais="Exterior" data-regime="Presencial" data-score="0">
-                    <div class="flex flex-col md:flex-row justify-between gap-4">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-2 text-[10px] font-bold uppercase tracking-tighter">
-                                <span class="text-blue-400">Exterior</span>
-                                <span class="text-slate-600">•</span>
-                                <span class="text-purple-400">Presencial</span>
-                            </div>
-                            <h2 class="text-xl font-bold text-white mb-1">Senior Analytics Engineer</h2>
-                            <p class="text-slate-400 text-sm mb-4">Consensys — العراق (+187 مكان آخر)</p>
-                            <p class="text-slate-300 text-sm italic bg-black/20 p-4 rounded-2xl">Erro na análise de dados.</p>
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
-                        <div class="text-center md:text-right flex flex-col justify-between">
-                            <div class="badge-match w-20 h-20 rounded-2xl flex flex-col items-center justify-center mx-auto md:ml-auto">
-                                <span class="text-2xl font-black text-white">0%</span>
-                                <span class="text-[8px] text-white/80 font-bold uppercase">Match</span>
-                            </div>
-                            <a href="#" target="_blank" class="mt-4 bg-white text-black px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-400 transition">Ver Vaga</a>
+                        <h2 class="text-xl font-bold mb-1">Business Intelligence & Operations Analyst</h2>
+                        <p class="text-slate-400 text-sm mb-4">Dentsply Sirona, Inc — Braselton, GA</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
+                    </div>
+                </div>
+                
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
                         </div>
+                        <h2 class="text-xl font-bold mb-1">BI Report Developer  REMOTE</h2>
+                        <p class="text-slate-400 text-sm mb-4">Liviniti — Atlanta, GA</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
+                    </div>
+                </div>
+                
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
+                        </div>
+                        <h2 class="text-xl font-bold mb-1">Business Intelligence Analyst</h2>
+                        <p class="text-slate-400 text-sm mb-4">VirtualVocations — Decatur, GA</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
+                    </div>
+                </div>
+                
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
+                        </div>
+                        <h2 class="text-xl font-bold mb-1">Business Intelligence  Analyst</h2>
+                        <p class="text-slate-400 text-sm mb-4">Volttalentstaffing — Alamo, GA</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
+                    </div>
+                </div>
+                
+                <div class="vaga-card p-6 rounded-2xl flex flex-col md:flex-row items-center gap-6" 
+                     data-pais="Exterior" data-regime="Presencial" data-score="0">
+                    <div class="flex-1">
+                        <div class="flex gap-2 mb-2 text-[10px] font-bold text-blue-400">
+                            <span>Exterior</span> | <span>Presencial</span>
+                        </div>
+                        <h2 class="text-xl font-bold mb-1">Business Intelligence Analyst I - People Analytics</h2>
+                        <p class="text-slate-400 text-sm mb-4">Unum UK — Atlanta, GA</p>
+                        <p class="text-slate-400 text-xs italic">Falha na extração de dados.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-black text-emerald-500 mb-2">0%</div>
+                        <a href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl text-xs font-bold block">Candidatar</a>
                     </div>
                 </div>
                 
@@ -694,14 +582,41 @@
         </div>
 
         <script>
-            function filtrar(pais, regime) {
+            let mainFilter = 'todos';
+            let subFilter = 'todos';
+
+            function setMainFilter(val) {
+                mainFilter = val;
+                updateUI('.filter-main', 'btn-' + val);
+                aplicarFiltros();
+            }
+
+            function setSubFilter(val) {
+                subFilter = val;
+                updateUI('.filter-sub', 'sub-' + val);
+                aplicarFiltros();
+            }
+
+            function updateUI(selector, activeId) {
+                document.querySelectorAll(selector).forEach(b => b.classList.remove('active-btn'));
+                document.getElementById(activeId).classList.add('active-btn');
+            }
+
+            function aplicarFiltros() {
                 const cards = document.querySelectorAll('.vaga-card');
                 cards.forEach(card => {
-                    let show = true;
-                    if (pais !== 'todos' && card.dataset.pais !== pais) show = false;
-                    if (regime !== 'todos' && card.dataset.regime !== regime) show = false;
-                    card.style.display = show ? 'block' : 'none';
+                    let matchMain = (mainFilter === 'todos' || card.dataset.pais === mainFilter);
+                    let matchSub = (subFilter === 'todos' || card.dataset.regime === subFilter);
+                    card.style.display = (matchMain && matchSub) ? 'flex' : 'none';
                 });
+            }
+            
+            // Ordenar por maior match ao carregar
+            window.onload = () => {
+                const list = document.getElementById('lista');
+                const cards = Array.from(list.children);
+                cards.sort((a, b) => b.dataset.score - a.dataset.score);
+                cards.forEach(c => list.appendChild(c));
             }
         </script>
     </body>
